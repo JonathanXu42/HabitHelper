@@ -2,20 +2,41 @@
   <div class="login-container">
     <h1>Login</h1>
     <form @submit.prevent="login">
-      <input type="email" v-model="email" placeholder="Email" required />
-      <input type="password" v-model="password" placeholder="Password" required />
+      <TextInput type="email" v-model="email" placeholder="Email" required />
+      <TextInput type="password" v-model="password" placeholder="Password" required />
+
+      <a class="forgot-password" @click.prevent="$router.push('/reset-password')">Forgot password?</a>
+
       <button type="submit">Login</button>
+    </form>
+
+    <p class="create-account-link" @click="showSignup = !showSignup">Create an account.</p>
+
+    <form v-if="showSignup" @submit.prevent="createAccount">
+      <TextInput type="email" v-model="signupEmail" placeholder="Email" required />
+      <TextInput type="password" v-model="signupPassword" placeholder="Password" required />
+      <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" required />
+      <button type="submit">Submit</button>
     </form>
   </div>
 </template>
 
 <script>
+import TextInput from '../components/TextInput.vue';
+
 export default {
   name: 'Login',
+  components: {
+    TextInput
+  },
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      showSignup: false,
+      signupEmail: '',
+      signupPassword: '',
+      signupConfirm: ''
     };
   },
   methods: {
@@ -40,14 +61,26 @@ export default {
   gap: 10px;
 }
 
-input {
-  padding: 8px;
-  font-size: 14px;
-}
-
 button {
   padding: 10px;
   font-size: 16px;
   cursor: pointer;
+}
+
+.forgot-password {
+  color: blue;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-decoration: underline;
+  display: inline-block;
+}
+
+.create-account-link {
+  color: green;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  margin-top: 10px;
 }
 </style>

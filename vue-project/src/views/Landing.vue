@@ -1,6 +1,8 @@
 <template>
   <div class="landing">
     <h1>Hello World</h1>
+
+    <a class="view-progress-log" @click.prevent="$router.push('/progress-log')">View progress log</a>
   </div>
 </template>
 
