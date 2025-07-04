@@ -18,6 +18,8 @@
       <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" required />
       <button type="submit">Submit</button>
     </form>
+
+    <button @click="signInWithGoogle">Sign in with Google</button>
   </div>
 </template>
 
@@ -47,7 +49,10 @@ export default {
       } else {
         alert('Please fill out both fields!');
       }
-    }
+    },
+    signInWithGoogle() {
+      window.location.href = 'http://localhost:3000/auth/google'
+    }    
   }
 };
 </script>

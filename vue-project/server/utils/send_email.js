@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const oauth2Client = new google.auth.OAuth2(
-    process.env.CLIENT_ID,
+    process.env.VITE_GOOGLE_CLIENT_ID,
     process.env.CLIENT_SECRET,
     "https://developers.google.com/oauthplayground"
 )
@@ -28,9 +28,9 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         type: 'OAuth2',
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD,
-        clientId: process.env.CLIENT_ID,
+        user: process.env.GMAIL_ADDRESS,
+        pass: process.env.GMAIL_PASSWORD,
+        clientId: process.env.VITE_GOOGLE_CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         refreshToken: process.env.REFRESH_TOKEN,
         accessToken: accessToken
@@ -41,7 +41,7 @@ export async function emailVerificationCode(recipientEmail) {
     const code = Math.floor(100000 + Math.random() * 900000);
 
     const mailOptions = {
-        from: process.env.EMAIL_ADDRESS,
+        from: process.env.GMAIL_ADDRESS,
         to: recipientEmail,
         subject: "Your HabitHelper Verification Code",
         text: `Your verification code is ${code}`
@@ -59,7 +59,7 @@ export async function emailVerificationCode(recipientEmail) {
 
 export async function emailNotification(recipientEmail, habit, streak) {
     const mailOptions = {
-        from: process.env.EMAIL_ADDRESS,
+        from: process.env.GMAIL_ADDRESS,
         to: recipientEmail,
         subject: `Day ${streak} of your ${habit} streak – let's keep it going!`,
         text: `You've been doing ${habit} everyday for ${streak} days – don't break the streak now!`

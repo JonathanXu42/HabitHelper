@@ -1,5 +1,6 @@
 <template>
   <div class="progressLog">
+    <Header></Header>
     <h1>Progress Log</h1>
 
     <p>July 3rd, 2025</p>
@@ -48,12 +49,68 @@
     obtain all of these, I was required to create a project on Google's Cloud Console, enable Gmail API, and jump through
     a couple more hoops. These secrets I will be storing in my .env file, which I will not be committing to Github. 
     </p>
+
+    <p>July 4th, 2025</p>
+
+    <p>
+    I've created a header/navbar component that will end up being used on the majority of the pages in this website,
+    including this one. I've also created a custom 404 resource not found error page that'll appear in the event that a 
+    user types in the name of a page that doesn't exist.
+    </p>
+
+    <p>
+    I decided to try allowing users to sign in using 3rd party email providers. For the time being, I'm only going to
+    support Google accounts/Gmail, since I already did much of the legwork when I set up the Gmail API. I installed the
+    frontend library vue3-google-login and the backend library google-auth-library.
+    </p>
+
+    <p>
+    One day later...
+    </p>
+
+    Well, that was an awful experience. I wanted to reuse the clientID and clientSecret that I generated on Google's
+    Cloud Console when I was implementing the Gmail API, since this login feature is a core part of OAuth2 authentication
+    and in theory I wouldn't have to enable any additional APIs to get it working. 
+    
+    This was the first issue I ran into: "Uncaught (in promise) Error: Prop client id required since plugin is not 
+    initialized with a client id". That basically means that the Google Login plugin I imported from the vue3-google-login
+    library couldn't figure out what my clientID was. I double-checked the filepath to my .env file, appended VITE_ to the 
+    beginning of my clientID name so that Vite could automatically load it and I wouldn't have to manually resolve filepaths,
+    I tried importing the clientID in main.js so that my Vue files would have access to it, and I even tried clearing
+    Vite's cache.
+
+    In the end, the issue was that I was using a named import in main.js instead of a default import. More confusingly,
+    I was supposed to use a default import in main.js to set up the plugin, and then a named import in Login.vue to import
+    the GoogleLogin component.
+
+    After resolving this issue, I got a 403 error upon loading the login page, with the GSI logger stating in the console that
+    "The given origin is not allowed for the given client ID". I figured out pretty quickly that this meant that I didn't
+    authorize the correct Javascript origins in Google Cloud Console, preventing Google Login plugin from executing. I checked
+    to make sure that I was using http when accessing my project in my localhost instead of https, and I thought for sure that
+    authorizing "http://localhost:5173" (the port number of my Vue.js frontend) as a Javascript origin would be enough, but for 
+    some reason, I had to also authorize "http://localhost" (without the port number).
+
+    The third major bug I encountered was by far the worse and it led me to abandon using vue3-google-login entirely and
+    switch to using passport.js. The GoogleLogin button in my Login.vue file was supposed to call one of two functions depending
+    on whether the login was successful: onGoogleSuccess() and onGoogleError(). No matter what I did, it wouldn't call either
+    function. I tried creating my own custom button with the GoogleLogin component as a wrapper, but that didn't help. I tried
+    adding and removing quotes around the function calls, thinking the component might not recognize the function names, but to
+    no avail. I thought maybe my version of vue3-google-login was outdated, but version 2.0.33 is the latest stable version.
+
+    In the end, I switched to passport.js, which relies much more on the backend in comparison to vue3-google-login. I got it
+    working in almost no time at all and didn't encounter any significant bugs, although the resulting code is longer and more
+    complex than what I would've ended up with if vue3-google-login had worked.
   </div>
 </template>
 
 <script>
+import Header from '../components/Header.vue';
+
 export default {
-    name: 'ProgressLog'
+    name: 'ProgressLog',
+    components: { 
+      Header 
+    }
 };
 </script>
 <style>
