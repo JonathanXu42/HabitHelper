@@ -1,16 +1,7 @@
 //utils/send_email.js
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
-
-// Get __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Point dotenv to the correct .env path
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+import './configureDotenv.js';
 
 const oauth2Client = new google.auth.OAuth2(
     process.env.VITE_GOOGLE_CLIENT_ID,
@@ -57,7 +48,7 @@ export async function emailVerificationCode(recipientEmail) {
     }
 }
 
-export async function emailNotification(recipientEmail, habit, streak) {
+export async function emailReminder(recipientEmail, habit, streak) {
     const mailOptions = {
         from: process.env.GMAIL_ADDRESS,
         to: recipientEmail,

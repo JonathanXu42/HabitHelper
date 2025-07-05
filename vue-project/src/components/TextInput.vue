@@ -6,6 +6,7 @@
       :placeholder="placeholder"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
+      :autocomplete="autocomplete"
       :required="required"
     />
   </div>
@@ -25,7 +26,8 @@ export default {
     required: {
       type: Boolean,
       default: false
-    }
+    },
+    autocomplete: String
   }
 };
 </script>

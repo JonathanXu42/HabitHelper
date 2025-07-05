@@ -2,8 +2,8 @@
   <div class="login-container">
     <h1>Login</h1>
     <form @submit.prevent="login">
-      <TextInput type="email" v-model="email" placeholder="Email" required />
-      <TextInput type="password" v-model="password" placeholder="Password" required />
+      <TextInput type="email" v-model="email" placeholder="Email" autocomplete="email" required />
+      <TextInput type="password" v-model="password" placeholder="Password" autocomplete="current-password" required />
 
       <a class="forgot-password" @click.prevent="$router.push('/reset-password')">Forgot password?</a>
 
@@ -13,9 +13,9 @@
     <p class="create-account-link" @click="showSignup = !showSignup">Create an account.</p>
 
     <form v-if="showSignup" @submit.prevent="createAccount">
-      <TextInput type="email" v-model="signupEmail" placeholder="Email" required />
-      <TextInput type="password" v-model="signupPassword" placeholder="Password" required />
-      <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" required />
+      <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
+      <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
+      <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
       <button type="submit">Submit</button>
     </form>
 
