@@ -13,9 +13,23 @@
     <p class="create-account-link" @click="showSignup = !showSignup">Create an account.</p>
 
     <form v-if="showSignup" @submit.prevent="createAccount">
+      <TextInput type="firstName" v-model="firstName" placeholder="First Name" autocomplete="given-name" required />
+      <TextInput type="lastName" v-model="lastName" placeholder="Last Name" autocomplete="family-name" required />
       <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
       <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
       <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
+      
+      <label for="timezone">Timezone</label>
+      <multiselect
+        id="timezone"
+        v-model="signupTimezone"
+        :options="timezones"
+        track-by="name"
+        label="label"
+        placeholder="Select your timezone"
+        required
+      />
+
       <button type="submit">Submit</button>
     </form>
 
@@ -25,21 +39,48 @@
 
 <script>
 import TextInput from '../components/TextInput.vue';
+import moment from 'moment-timezone';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.min.css';
 
 export default {
   name: 'Login',
   components: {
-    TextInput
+    TextInput,
+    Multiselect
   },
   data() {
     return {
       email: '',
       password: '',
       showSignup: false,
+      signupFirstName: '',
+      signupLastName: '',
       signupEmail: '',
       signupPassword: '',
-      signupConfirm: ''
+      signupTimezone: null,
+      signupConfirm: '',
+      timezones: []
     };
+  },
+  mounted() {
+    // Populate timezone list with offsets
+    this.timezones = moment.tz.names().map(tz => {
+      const offsetMinutes = moment.tz(tz).utcOffset();
+      const sign = offsetMinutes >= 0 ? '+' : '-';
+      const hours = Math.floor(Math.abs(offsetMinutes) / 60).toString().padStart(2, '0');
+      const minutes = (Math.abs(offsetMinutes) % 60).toString().padStart(2, '0');
+      const offset = `UTC${sign}${hours}:${minutes}`;
+      return {
+        name: tz,
+        label: `${tz} (${offset})`
+      };
+    });
+
+    const guessedName = moment.tz.guess();
+
+    // Find the full object in timezones that matches the guessed timezone name
+    this.signupTimezone = this.timezones.find(tz => tz.name === guessedName) || null;
   },
   methods: {
     login() {

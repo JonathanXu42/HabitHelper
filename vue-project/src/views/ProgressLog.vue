@@ -145,6 +145,47 @@
 
     Each Habit has between 0 and many HabitLogs, and each HabitLog has a UserID and a HabitID indicating what User and Habit they're tied to.
     HabitLogs are a way for users to write daily notes about their habits. 
+
+    <p>July 6th, 2025</p>
+
+    <p>
+    I fleshed out the login and logout features today. I'm using session-based authentication using MongoDB and Prisma, and instead of trying 
+    to manage sessions manually by creating a collection in my Prisma schema, I decided to install connect-mongo to manage sessions for me,
+    together with express-session.
+    </p>
+
+    <p>
+    Currently, the only way users can sign out is by clicking the Sign Out button at the top of the header, and all this does is redirect the
+    user to the login page. Session-based authentication requires the server and the user to have a matching session and a matching cookie, 
+    respectively, and in order to make the Sign Out button actually sign users out, I need to make the Sign Out button destroy the session
+    stored on the server and invalidate the user's cookie.
+    </p>
+
+    <p>
+    I accomplished this by creating a backend API for the route "/auth/logout" that destroys the session first and the cookie second, and then
+    making the Sign Out button in the Header.vue file make a GET request to that API upon being clicked. Since my frontend and backend are
+    running on different ports, I had to install and configure the cors package in npm to get this to work. 
+    </p>
+
+    <p>
+    I added a First Name, Last Name, and Timezone attribute to the create account section of the login page. The first two were pretty simple.
+    The Timezone attribute was a bit of a challenge because there's so many timezones. There's 38 UTC offsets, but since different places might
+    observe daylight savings time at different times or not at all, you end up with over 400 different timezones. In the end, I decided that
+    it would be better to suffer through a long list of timezones once and never have to worry about it again, than for email reminders to be
+    thrown off if the user's timezone changes due to daylight savings time.
+    </p>
+
+    <p>
+    The second choice I had to make with regards to timezones was how to implement them and where to get the list of timezones from. 
+    Intl.supportedValuesOf('timezone') is a built-in function in modern Javascript that returns a list of over 400 timezones in alphabetical 
+    order, but it only works in modern browsers and I'd have to create a fallback list for older browsers. I ended up installing the package
+    moment-timezone so I wouldn't have to worry about browser versions.
+    </p> 
+
+    <p>
+    Finally, I rolled out two features to make the process of selecting a timezone less anguishing. The first is guessing and preselecting
+    the user's timezone in the dropdown menu. The second is making the timezones searchable, by both name and UTC offset.
+    </p>
   </div>
 </template>
 

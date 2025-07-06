@@ -9,6 +9,7 @@
       >
         {{ link.label }}
       </a>
+      <button @click="logout" class="nav-link">Sign Out</button>
     </nav>
   </header>
 </template>
@@ -22,8 +23,21 @@ export default {
         { label: 'Home', href: '/landing' },
         { label: 'Progress Log', href: '/progress-log' },
         { label: 'Reset Password', href: '/reset-password' },
-        { label: 'Sign Out', href: '/' },
       ]
+    }
+  },
+  methods: {
+    logout() {
+      fetch('http://localhost:3000/auth/logout', {
+        method: 'GET',
+        credentials: 'include' // ensures session cookie is sent
+      })
+        .then(() => {
+          window.location.href = '/' // redirect after logout
+        })
+        .catch(err => {
+          console.error('Logout failed:', err)
+        })
     }
   }
 }

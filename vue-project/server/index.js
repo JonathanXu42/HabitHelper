@@ -4,15 +4,21 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
-import './passport.js';
+import cors from 'cors';
 
 import emailRoutes from './routes/email.js';
+import './passport.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const NODE_PORT = process.env.NODE_PORT;
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}))
 
 app.use(express.json());
 
@@ -60,6 +66,20 @@ app.get('/api/me', (req, res) => {
     res.status(401).json({ error: 'Not authenticated' })
   }
 })
+
+app.get('/auth/logout', (req, res) => {
+  req.logout(() => {
+    req.session.destroy(err => {
+      if (err) {
+        return res.status(500).send('Logout failed');
+      }
+
+      // Clear the session cookie
+      res.clearCookie('connect.sid'); // Default name unless you renamed it
+      res.json({ message: 'Logged out' })
+    });
+  });
+});
 
 // 404 for unknown API routes
 app.use('/api', (req, res) => {
