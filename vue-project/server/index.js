@@ -1,9 +1,10 @@
 // server/index.js
 import express from 'express';
 import dotenv from 'dotenv';
-import session from 'express-session'
-import passport from 'passport'
-import './passport.js'
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import passport from 'passport';
+import './passport.js';
 
 import emailRoutes from './routes/email.js';
 
@@ -11,7 +12,7 @@ import emailRoutes from './routes/email.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const NODE_PORT = process.env.NODE_PORT;
 
 app.use(express.json());
 
@@ -19,7 +20,14 @@ app.use(express.json());
 app.use(session({
   secret: 'your-secret',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.DATABASE_URL,
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  }
 }))
 
 // Passport middleware
@@ -60,6 +68,6 @@ app.use('/api', (req, res) => {
 
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(NODE_PORT, () => {
+  console.log(`Server is running on http://localhost:${NODE_PORT}`);
 });
