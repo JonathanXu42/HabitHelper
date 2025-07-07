@@ -73,7 +73,15 @@ app.post('/auth/signup', async (req, res) => {
       }
     });
 
-    res.json({ message: 'Account created', user: newUser });
+    // Auto-login the user
+    req.login(newUser, (err) => {
+      if (err) {
+        console.error('Login error after signup:', err);
+        return res.status(500).json({ error: 'Login after signup failed' });
+      }
+
+      res.json({ message: 'Signup successful', user: newUser });
+    });
   } catch (err) {
     console.error('Error in /auth/signup:', err);
     res.status(500).json({ error: 'Error creating account' });

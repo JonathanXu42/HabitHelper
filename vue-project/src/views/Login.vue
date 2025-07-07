@@ -128,8 +128,8 @@ export default {
           return alert(error.error || 'Signup failed');
         }
 
-        alert('Account created! You can now log in.');
-        this.showSignup = false;
+        const user = await response.json();
+        this.$router.push('/landing');
       } catch (err) {
         alert('Signup request failed');
       }
