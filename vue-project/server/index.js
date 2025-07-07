@@ -6,7 +6,7 @@ import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import prisma from './prisma/client.js';
 
 import emailRoutes from './routes/email.js';
 import resetPasswordRoutes from './routes/reset-password.js';
@@ -17,7 +17,6 @@ dotenv.config();
 
 const app = express();
 const NODE_PORT = process.env.NODE_PORT;
-const prisma = new PrismaClient();
 
 app.use(cors({
   origin: 'http://localhost:5173',

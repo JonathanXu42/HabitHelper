@@ -30,6 +30,7 @@
         :modelValue="newPassword"
         @update:modelValue="newPassword = $event"
         placeholder="New Password"
+        autocomplete="new-password"
         required
       />
       <TextInput
@@ -37,6 +38,7 @@
         :modelValue="confirmPassword"
         @update:modelValue="confirmPassword = $event"
         placeholder="Confirm New Password"
+        autocomplete="new-password"
         required
       />
       <button type="submit">Set New Password</button>
