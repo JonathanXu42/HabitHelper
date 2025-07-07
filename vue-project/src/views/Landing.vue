@@ -22,8 +22,18 @@ export default {
       email: null
     }
   },
-  mounted() {
-    this.email = this.$route.query.email
+  async mounted() {
+    try {
+      const res = await fetch('http://localhost:3000/api/me', {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const user = await res.json();
+        this.email = user.email;
+      }
+    } catch (err) {
+      console.error("Failed to load user info", err);
+    }
   }
 };
 </script>

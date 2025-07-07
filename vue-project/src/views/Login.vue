@@ -114,6 +114,7 @@ export default {
         const response = await fetch('http://localhost:3000/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', 
           body: JSON.stringify({
             firstName: this.signupFirstName,
             lastName: this.signupLastName,
@@ -131,6 +132,7 @@ export default {
         const user = await response.json();
         this.$router.push('/landing');
       } catch (err) {
+        console.error('Signup request failed:', err)
         alert('Signup request failed');
       }
     },

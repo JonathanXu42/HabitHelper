@@ -190,8 +190,8 @@
     <p>July 7th, 2025</p>
 
     <p>
-    OK, it took me a long time, but I finally finished the login and logout features. Hold your breath, here's a summary of how my website
-    handles signups, logins, and logouts:
+    Today's the most productive day I've had while working on this project. It took me a long time, but I finally finished the login and logout 
+    features. Hold your breath, here's a summary of how my website handles signups, logins, and logouts:
     </p>
     <p>- When a user who doesn't have an account tries to log in using an email and password, the website won't let them. The user must
       first create an account by providing an email, password, and timezone. Originally I was gonna require first and last names, but I'm
@@ -206,7 +206,10 @@
     <p>Wanna know why I was stuck for so long on the create account route in my backend? I forgot to import PrismaClient. Le sigh...</p>
 
     <p>I also updated the reset password page so that now, users can reset their passwords (or in the case of gmail logins, set their passwords
-      for the first time). Nothing interesting to write home about. </p>
+      for the first time). I also added a navigational guard defined in my src/auth.js file so that users can't access the landing page if they're
+      not logged in. If I want to create more webpages in the future that need to be protected, it's as easy as adding one line of code to
+      src/router/index.js.
+    </p>
   </div>
 </template>
 

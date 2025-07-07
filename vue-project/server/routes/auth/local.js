@@ -9,8 +9,9 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.json(req.user);
 });
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', async (req, res, next) => {
   const { firstName, lastName, email, password, timezone } = req.body;
+
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return res.status(400).json({ error: 'Account already exists with that email' });
@@ -20,13 +21,17 @@ router.post('/signup', async (req, res) => {
       data: { firstName, lastName, email, password: hashedPassword, timezone }
     });
 
-    req.login(newUser, err => {
-      if (err) return res.status(500).json({ error: 'Login after signup failed' });
-      res.json({ message: 'Signup successful', user: newUser });
+    // ✅ Log the user in after signup
+    req.login(newUser, (err) => {
+      if (err) {
+        console.error('Login after signup failed', err);
+        return next(err); // ensures proper error handling
+      }
+      return res.json({ email: newUser.email });
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error creating account' });
+    console.error('Signup error:', err);
+    return res.status(500).json({ error: 'Error creating account' });
   }
 });
 
