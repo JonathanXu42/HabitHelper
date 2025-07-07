@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
 import emailRoutes from './routes/email.js';
+import resetPasswordRoutes from './routes/reset-password.js';
 import './passport.js';
 
 // Load environment variables
@@ -45,6 +46,7 @@ app.use(passport.session())
 
 // Routes
 app.use('/api', emailRoutes);
+app.use('/reset-password', resetPasswordRoutes);
 
 // Login route
 app.post('/auth/login', passport.authenticate('local'), (req, res) => {

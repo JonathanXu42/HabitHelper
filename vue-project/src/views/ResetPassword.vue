@@ -10,7 +10,7 @@
         placeholder="Email"
         required
       />
-      <button type="submit">Reset password</button>
+      <button type="submit">Verify email</button>
     </form>
 
     <form v-if="codeSent" @submit.prevent="verifyCode">
@@ -22,6 +22,24 @@
         required
       />
       <button type="submit">Verify</button>
+    </form>
+
+    <form v-if="codeVerified" @submit.prevent="submitNewPassword">
+      <TextInput
+        type="password"
+        :modelValue="newPassword"
+        @update:modelValue="newPassword = $event"
+        placeholder="New Password"
+        required
+      />
+      <TextInput
+        type="password"
+        :modelValue="confirmPassword"
+        @update:modelValue="confirmPassword = $event"
+        placeholder="Confirm New Password"
+        required
+      />
+      <button type="submit">Set New Password</button>
     </form>
   </div>
 </template>
@@ -39,7 +57,8 @@ export default {
       email: '',
       codeSent: false,
       enteredCode: '',
-      verificationCode: ''
+      verificationCode: '',
+      codeVerified: false
     };
   },
   methods: {
@@ -73,9 +92,38 @@ export default {
     verifyCode() {
       if (this.enteredCode === this.verificationCode) {
         alert('Verification successful!');
-        // next step: show password reset form
+        this.codeVerified = true;
       } else {
         alert('Incorrect verification code.');
+      }
+    },
+
+    async submitNewPassword() {
+      if (this.newPassword !== this.confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: this.email,
+            newPassword: this.newPassword
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Password updated successfully!');
+          this.$router.push('/landing');
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        console.error('Password reset error:', error);
+        alert('Failed to reset password.');
       }
     }
   }

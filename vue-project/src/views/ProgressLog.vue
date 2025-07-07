@@ -204,6 +204,9 @@
     <p>- When a user creates an account with a gmail address and password, and tries to log in using their gmail, the website will let them.</p>
 
     <p>Wanna know why I was stuck for so long on the create account route in my backend? I forgot to import PrismaClient. Le sigh...</p>
+
+    <p>I also updated the reset password page so that now, users can reset their passwords (or in the case of gmail logins, set their passwords
+      for the first time). Nothing interesting to write home about. </p>
   </div>
 </template>
 
