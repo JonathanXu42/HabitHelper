@@ -13,8 +13,8 @@
     <p class="create-account-link" @click="showSignup = !showSignup">Create an account.</p>
 
     <form v-if="showSignup" @submit.prevent="createAccount">
-      <TextInput type="firstName" v-model="firstName" placeholder="First Name" autocomplete="given-name" required />
-      <TextInput type="lastName" v-model="lastName" placeholder="Last Name" autocomplete="family-name" required />
+      <TextInput type="firstName" v-model="signupFirstName" placeholder="First Name" autocomplete="given-name" />
+      <TextInput type="lastName" v-model="signupLastName" placeholder="Last Name" autocomplete="family-name" />
       <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
       <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
       <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
@@ -83,17 +83,60 @@ export default {
     this.signupTimezone = this.timezones.find(tz => tz.name === guessedName) || null;
   },
   methods: {
-    login() {
-      if (this.email && this.password) {
-        // Accept any email/password for now
+    async login() {
+      try {
+        const response = await fetch('http://localhost:3000/auth/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: this.email, password: this.password })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          return alert(error.message || 'Login failed');
+        }
+
+        const user = await response.json();
         this.$router.push('/landing');
-      } else {
-        alert('Please fill out both fields!');
+      } catch (err) {
+        alert('Login request failed');
+      }
+    },
+    async createAccount() {
+      if (this.signupPassword !== this.signupConfirm) {
+        return alert('Passwords do not match');
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: this.signupFirstName,
+            lastName: this.signupLastName,
+            email: this.signupEmail,
+            password: this.signupPassword,
+            timezone: this.signupTimezone.name
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          return alert(error.error || 'Signup failed');
+        }
+
+        alert('Account created! You can now log in.');
+        this.showSignup = false;
+      } catch (err) {
+        alert('Signup request failed');
       }
     },
     signInWithGoogle() {
-      window.location.href = 'http://localhost:3000/auth/google'
-    }    
+      window.location.href = 'http://localhost:3000/auth/google';
+    }
   }
 };
 </script>

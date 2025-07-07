@@ -5,6 +5,8 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import cors from 'cors';
+import bcrypt from 'bcrypt';
+import { PrismaClient } from '@prisma/client';
 
 import emailRoutes from './routes/email.js';
 import './passport.js';
@@ -14,6 +16,7 @@ dotenv.config();
 
 const app = express();
 const NODE_PORT = process.env.NODE_PORT;
+const prisma = new PrismaClient();
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -42,6 +45,40 @@ app.use(passport.session())
 
 // Routes
 app.use('/api', emailRoutes);
+
+// Login route
+app.post('/auth/login', passport.authenticate('local'), (req, res) => {
+  res.json(req.user);
+});
+
+// Signup route
+app.post('/auth/signup', async (req, res) => {
+  const { firstName, lastName, email, password, timezone } = req.body;
+  console.log({ firstName, lastName, email, password, timezone });
+
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Account already exists with that email' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        timezone
+      }
+    });
+
+    res.json({ message: 'Account created', user: newUser });
+  } catch (err) {
+    console.error('Error in /auth/signup:', err);
+    res.status(500).json({ error: 'Error creating account' });
+  }
+});
 
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -85,7 +122,6 @@ app.get('/auth/logout', (req, res) => {
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
-
 
 // Start server
 app.listen(NODE_PORT, () => {

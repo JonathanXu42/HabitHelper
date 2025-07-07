@@ -186,6 +186,24 @@
     Finally, I rolled out two features to make the process of selecting a timezone less anguishing. The first is guessing and preselecting
     the user's timezone in the dropdown menu. The second is making the timezones searchable, by both name and UTC offset.
     </p>
+
+    <p>July 7th, 2025</p>
+
+    <p>
+    OK, it took me a long time, but I finally finished the login and logout features. Hold your breath, here's a summary of how my website
+    handles signups, logins, and logouts:
+    </p>
+    <p>- When a user who doesn't have an account tries to log in using an email and password, the website won't let them. The user must
+      first create an account by providing an email, password, and timezone. Originally I was gonna require first and last names, but I'm
+      gonna make them optional. Once the user creates an account, the website logs the user in automatically</p>
+    <p>- When a user who doesn't have an account tries to log in using their gmail account, the website creates an account for them and
+      logs them in automatically. No need for manual account creation when you sign in with gmail. The website will automatically set a
+      first name, last name, and timezone based off the user's gmail account, but no password, which is important because...</p>
+    <p>- When a user who has an account associated with gmail, tries to log in using a password and email combo, the website won't let them.
+      They must first either set a password in the settings page (I'm going to add this) or log in with gmail</p>
+    <p>- When a user creates an account with a gmail address and password, and tries to log in using their gmail, the website will let them.</p>
+
+    <p>Wanna know why I was stuck for so long on the create account route in my backend? I forgot to import PrismaClient. Le sigh...</p>
   </div>
 </template>
 
