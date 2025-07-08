@@ -23,6 +23,7 @@ export default {
         { label: 'Home', href: '/landing' },
         { label: 'Progress Log', href: '/progress-log' },
         { label: 'Reset Password', href: '/reset-password' },
+        { label: 'Settings', href: '/settings'}
       ]
     }
   },

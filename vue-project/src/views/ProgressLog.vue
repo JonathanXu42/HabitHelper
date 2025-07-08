@@ -210,6 +210,13 @@
       not logged in. If I want to create more webpages in the future that need to be protected, it's as easy as adding one line of code to
       src/router/index.js.
     </p>
+
+    <p>July 8th, 2025</p>
+
+    <p>
+    I created a settings page where users can update their first name, last name, and timezone, and also delete their account. Deleting one's
+    account will also delete all the Habits and HabitLogs associated with the user.
+    </p>
   </div>
 </template>
 
