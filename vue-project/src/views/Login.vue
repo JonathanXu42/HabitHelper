@@ -39,9 +39,9 @@
 
 <script>
 import TextInput from '../components/TextInput.vue';
-import moment from 'moment-timezone';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
+import { useTimezoneStore } from '../stores/timezoneStore';
 
 export default {
   name: 'Login',
@@ -60,27 +60,16 @@ export default {
       signupPassword: '',
       signupTimezone: null,
       signupConfirm: '',
+      signupTimezone: null,
+      timezoneStore: null,
       timezones: []
     };
   },
-  mounted() {
-    // Populate timezone list with offsets
-    this.timezones = moment.tz.names().map(tz => {
-      const offsetMinutes = moment.tz(tz).utcOffset();
-      const sign = offsetMinutes >= 0 ? '+' : '-';
-      const hours = Math.floor(Math.abs(offsetMinutes) / 60).toString().padStart(2, '0');
-      const minutes = (Math.abs(offsetMinutes) % 60).toString().padStart(2, '0');
-      const offset = `UTC${sign}${hours}:${minutes}`;
-      return {
-        name: tz,
-        label: `${tz} (${offset})`
-      };
-    });
-
-    const guessedName = moment.tz.guess();
-
-    // Find the full object in timezones that matches the guessed timezone name
-    this.signupTimezone = this.timezones.find(tz => tz.name === guessedName) || null;
+  created() {
+    this.timezoneStore = useTimezoneStore();
+    this.timezoneStore.initTimezones();
+    this.timezones = this.timezoneStore.timezones;
+    this.signupTimezone = this.timezoneStore.guessDefault();
   },
   methods: {
     async login() {

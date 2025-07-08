@@ -222,7 +222,9 @@
     I installed Pinia today as well. Pinia is Vue 3's official state management library and it allows me to store and manage data in one place and
     share it across components and pages. Previously, my website had to make a request to the backend everytime the user visited a page protected
     by a navigational guard, in order to figure out if the user was authenticated and should be allowed to view the page. With Pinia, my website
-    can fetch the data once and store it in memory.
+    can fetch the data once and store it in memory. The same is true for the timezone dropdown menu on my Login and Settings pages. My website will
+    now create a list of 400+ timezones only once and then store it in localStorage, instead of creating it everytime the user loads the Login or
+    Settings page. 
     </p> 
   </div>
 </template>
