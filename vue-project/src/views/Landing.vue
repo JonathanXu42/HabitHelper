@@ -3,7 +3,9 @@
     <Header></Header>
 
     <h1>Hello World</h1>
-    <p v-if="email">Logged in as: {{ email }}</p>
+    <div v-if="userStore.isLoggedIn">
+      Welcome, {{ userStore.user.firstName userStore.user.lastName }}!
+    </div>
 
     <a class="view-progress-log" @click.prevent="$router.push('/progress-log')">View progress log</a>
   </div>
@@ -11,6 +13,7 @@
 
 <script>
 import Header from '../components/Header.vue'
+import { useUserStore } from '../stores/userStore'
 
 export default {
   name: 'Landing',
@@ -19,21 +22,11 @@ export default {
   },
   data() {
     return {
-      email: null
+      userStore: null
     }
   },
-  async mounted() {
-    try {
-      const res = await fetch('http://localhost:3000/api/me', {
-        credentials: 'include'
-      });
-      if (res.ok) {
-        const user = await res.json();
-        this.email = user.email;
-      }
-    } catch (err) {
-      console.error("Failed to load user info", err);
-    }
+  created() {
+    this.userStore = useUserStore();
   }
 };
 </script>

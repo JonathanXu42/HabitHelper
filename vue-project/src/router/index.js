@@ -1,6 +1,7 @@
 // router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import { checkAuth } from '../auth';
+// import { checkAuth } from '../auth';
+import { useUserStore } from '../stores/userStore' //
 import Login from '../views/Login.vue';
 import Landing from '../views/Landing.vue';
 import ResetPassword from '../views/ResetPassword.vue';
@@ -23,17 +24,31 @@ const router = createRouter({
 });
 
 // Navigation Guard
+// router.beforeEach(async (to, from, next) => {
+//   if (to.meta.requiresAuth) {
+//     const user = await checkAuth();
+//     if (!user) {
+//       next({ name: 'Login' });
+//     } else {
+//       next();
+//     }
+//   } else {
+//     next();
+//   }
+// });
+
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth) {
-    const user = await checkAuth();
-    if (!user) {
-      next({ name: 'Login' });
-    } else {
-      next();
-    }
-  } else {
-    next();
+  const userStore = useUserStore()
+
+  if (userStore.user === null && to.meta.requiresAuth) {
+    await userStore.fetchUser()
   }
-});
+
+  if (to.meta.requiresAuth && !userStore.user) {
+    next('/')
+  } else {
+    next()
+  }
+})
 
 export default router;

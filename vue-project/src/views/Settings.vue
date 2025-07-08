@@ -36,6 +36,7 @@ import TextInput from '../components/TextInput.vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import moment from 'moment-timezone';
+import { useUserStore } from '../stores/userStore';
 
 export default {
   name: 'Settings',
@@ -51,10 +52,19 @@ export default {
       timezone: null,
       timezones: [],
       showDeleteModal: false,
-      emailConfirmation: ''
+      emailConfirmation: '',
+      userStore: null
     };
   },
   mounted() {
+    this.userStore = useUserStore();
+
+    // Fill form from user data
+    if (this.userStore.user) {
+      this.firstName = this.userStore.user.firstName || '';
+      this.lastName = this.userStore.user.lastName || '';
+    }    
+
     // Populate timezone list with offsets
     this.timezones = moment.tz.names().map(tz => {
       const offsetMinutes = moment.tz(tz).utcOffset();
@@ -94,8 +104,10 @@ export default {
 
         const result = await response.json();
         alert('Settings updated successfully');
-        console.log(result.user); // updated user data (optional)
         
+        // ✅ Update user in Pinia store
+        this.userStore.user = result.user;
+
       } catch (error) {
         console.error(error)
         alert("Couldn't update user settings")
@@ -118,6 +130,8 @@ export default {
         }
 
         alert('Account deleted successfully');
+        // Clear user store and redirect
+        this.userStore.logout();
         this.$router.push('/');
 
       } catch (error) {

@@ -217,6 +217,13 @@
     I created a settings page where users can update their first name, last name, and timezone, and also delete their account. Deleting one's
     account will also delete all the Habits and HabitLogs associated with the user.
     </p>
+
+    <p>
+    I installed Pinia today as well. Pinia is Vue 3's official state management library and it allows me to store and manage data in one place and
+    share it across components and pages. Previously, my website had to make a request to the backend everytime the user visited a page protected
+    by a navigational guard, in order to figure out if the user was authenticated and should be allowed to view the page. With Pinia, my website
+    can fetch the data once and store it in memory.
+    </p> 
   </div>
 </template>
 
