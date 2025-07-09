@@ -226,6 +226,21 @@
     now create a list of 400+ timezones only once and then store it in localStorage, instead of creating it everytime the user loads the Login or
     Settings page. 
     </p> 
+
+    <p>July 9th, 2025</p>
+
+    <p>
+    It appears that the refresh token I use to allow my website to automatically send emails from my gmail account, has expired. I wrote a script 
+    using the npm "open" package to get a new refresh token the next time this happens, to save me some time. Since I'm the only user/developer of 
+    this site who's ever going to need a refresh token, I'm not uploading this script to my Github repo.
+    </p>
+
+    <p>
+    I noticed that whenever I'm logged in with multiple gmail accounts in Google Chrome and I sign into the website with gmail, Google lets me select
+    what account I want to log in with. However, when I'm logged in with only one gmail account, Google selects that as the default account to log me
+    in with. I edited the Google Strategy in my passport.js file so that Google will always ask the user to select what gmail account they want to
+    log in with.
+    </p>
   </div>
 </template>
 

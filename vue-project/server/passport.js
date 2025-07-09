@@ -30,7 +30,7 @@ passport.use(new LocalStrategy(
   }
 ));
 
-passport.use(new GoogleStrategy({
+const googleStrategy = new GoogleStrategy({
   clientID: process.env.VITE_GOOGLE_CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   callbackURL: process.env.GOOGLE_CALLBACK_URL
@@ -56,7 +56,15 @@ passport.use(new GoogleStrategy({
   } catch (error) {
     return done(error, null);
   }
-}));
+});
+
+googleStrategy.authorizationParams = function () {
+  return {
+    prompt: 'select_account'
+  };
+};
+
+passport.use(googleStrategy);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
