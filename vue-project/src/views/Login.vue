@@ -10,28 +10,7 @@
       <button type="submit">Login</button>
     </form>
 
-    <p class="create-account-link" @click="showSignup = !showSignup">Create an account.</p>
-
-    <form v-if="showSignup" @submit.prevent="createAccount">
-      <TextInput type="firstName" v-model="signupFirstName" placeholder="First Name" autocomplete="given-name" />
-      <TextInput type="lastName" v-model="signupLastName" placeholder="Last Name" autocomplete="family-name" />
-      <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
-      <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
-      <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
-      
-      <label for="timezone">Timezone</label>
-      <multiselect
-        id="timezone"
-        v-model="signupTimezone"
-        :options="timezones"
-        track-by="name"
-        label="label"
-        placeholder="Select your timezone"
-        required
-      />
-
-      <button type="submit">Submit</button>
-    </form>
+    <a class="create-account-link" @click.prevent="$router.push('/create-account')">Create an account</a>
 
     <button @click="signInWithGoogle">Sign in with Google</button>
   </div>
@@ -39,37 +18,17 @@
 
 <script>
 import TextInput from '../components/TextInput.vue';
-import Multiselect from 'vue-multiselect';
-import 'vue-multiselect/dist/vue-multiselect.min.css';
-import { useTimezoneStore } from '../stores/timezoneStore';
 
 export default {
   name: 'Login',
   components: {
-    TextInput,
-    Multiselect
+    TextInput
   },
   data() {
     return {
       email: '',
-      password: '',
-      showSignup: false,
-      signupFirstName: '',
-      signupLastName: '',
-      signupEmail: '',
-      signupPassword: '',
-      signupTimezone: null,
-      signupConfirm: '',
-      signupTimezone: null,
-      timezoneStore: null,
-      timezones: []
+      password: ''
     };
-  },
-  created() {
-    this.timezoneStore = useTimezoneStore();
-    this.timezoneStore.initTimezones();
-    this.timezones = this.timezoneStore.timezones;
-    this.signupTimezone = this.timezoneStore.guessDefault();
   },
   methods: {
     async login() {
@@ -92,37 +51,6 @@ export default {
         this.$router.push('/landing');
       } catch (err) {
         alert('Login request failed');
-      }
-    },
-    async createAccount() {
-      if (this.signupPassword !== this.signupConfirm) {
-        return alert('Passwords do not match');
-      }
-
-      try {
-        const response = await fetch('http://localhost:3000/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', 
-          body: JSON.stringify({
-            firstName: this.signupFirstName,
-            lastName: this.signupLastName,
-            email: this.signupEmail,
-            password: this.signupPassword,
-            timezone: this.signupTimezone.name
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          return alert(error.error || 'Signup failed');
-        }
-
-        const user = await response.json();
-        this.$router.push('/landing');
-      } catch (err) {
-        console.error('Signup request failed:', err)
-        alert('Signup request failed');
       }
     },
     signInWithGoogle() {

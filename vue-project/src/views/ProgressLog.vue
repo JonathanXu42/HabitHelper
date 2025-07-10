@@ -246,7 +246,16 @@
 
     <p>
     Good work today. I made all of a user's habits display on the landing page and gave the user the ability to edit and delete habits from the
-    landing page.
+    landing page. I also made a separate Create Account page for creating an account using an email/password combination, since Login.vue, which has
+    been handling all of my logins and signups is getting a little bit too long and hard to maintain. Now when a user wants to create an account
+    using an email and password, they'll be sent a verification code, which should prevent malicious actors from creating tons of fake accounts.
+    </p>
+
+    <p>
+    Along the same line of thinking, I added some protections to ensure that certain pages can only be accessed by users who are logged in and
+    authenticated. My frontend has always been protected by a navigational guard that checks if the user is authenticated before letting them
+    visit certain pages, but this wouldn't have stopped someone from using a tool like Postman or Curl to make requests to my backend without
+    interacting with the frontend.
     </p>
   </div>
 </template>

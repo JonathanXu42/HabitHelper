@@ -10,14 +10,14 @@
     <a class="view-progress-log" @click.prevent="$router.push('/progress-log')">View progress log</a>
   </div>
 
-  <button class="add-button" @click="showModal = true">+</button>
+  <button class="add-button" @click="openAddModal">+</button>
 
   <!-- Grid of Habits -->
   <div class="habit-grid" v-if="habits.length">
     <HabitCard v-for="habit in habits" :key="habit.id" :habit="habit" @edit="openEditModal" />
   </div>
 
-  <HabitModal v-if="showModal" :editMode="editMode" :habitData="habitToEdit" @close="showModal = false" @created="fetchHabits" @deleted="fetchHabits" />
+  <HabitModal v-if="showModal" :editMode="editMode" :habitData="habitToEdit" @close="closeModal" @created="fetchHabits" @deleted="fetchHabits" />
 </template>
 
 <script>
@@ -57,6 +57,15 @@ export default {
       } catch (err) {
         console.error(err);
       }
+    },
+    openAddModal() {
+      this.habitToEdit = null;
+      this.editMode = false;
+
+      // Force nextTick to let HabitModal start fresh
+      this.$nextTick(() => {
+        this.showModal = true;
+      });
     },
     openEditModal(habit) {
       this.habitToEdit = habit;

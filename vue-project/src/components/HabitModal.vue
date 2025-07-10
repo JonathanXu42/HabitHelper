@@ -93,8 +93,43 @@ export default {
       default: null
     }
   },
+  created() {
+    if (!this.editMode) {
+      this.resetForm();
+    }
+  },
   watch: {
-    // Initialize empty arrays when daysOfWeek changes
+    habitData: {
+      immediate: true,
+      handler(newData) {
+        if (this.editMode && newData) {
+          const { name, notes, daysOfWeek, emailReminderSettings } = newData;
+
+          this.form.name = name;
+          this.form.notes = notes || '';
+          this.form.daysOfWeek = [...daysOfWeek];
+          this.form.emailReminderEnabled = emailReminderSettings?.enabled || false;
+
+          // ✅ Reconstruct reminderTimesByDay using numeric keys
+          this.form.reminderTimesByDay = {};
+          if (emailReminderSettings?.timesByDay) {
+            this.form.reminderTimesByDay = {};
+            for (const [day, timeStrings] of Object.entries(emailReminderSettings.timesByDay)) {
+                const dayNum = parseInt(day, 10);
+                this.form.reminderTimesByDay[dayNum] = timeStrings.map(str => {
+                const [hh, mm] = str.split(':').map(Number);
+                const period = hh >= 12 ? 'PM' : 'AM';
+                const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+                return { hour: hour12, minute: mm, period };
+              });
+            }
+          } else {
+            this.form.reminderTimesByDay = {};
+          }
+        }
+      }
+    },
+
     'form.daysOfWeek'(newDays) {
       for (const day of newDays) {
         if (!this.form.reminderTimesByDay[day]) {
@@ -102,35 +137,11 @@ export default {
         }
       }
 
-      // Sort the daysOfWeek array in-place (numeric ascending)
+      // Sort the daysOfWeek array
       this.form.daysOfWeek.sort((a, b) => a - b);
     }
   },
   methods: {
-    created() {
-      if (this.habitData) {
-        const { name, notes, daysOfWeek, emailReminderSettings } = this.habitData;
-
-        // Copy habit data into form
-        this.form.name = name;
-        this.form.notes = notes || '';
-        this.form.daysOfWeek = [...daysOfWeek];
-        this.form.emailReminderEnabled = emailReminderSettings?.enabled || false;
-
-        // Convert "08:00" format to { hour, minute, period }
-        if (emailReminderSettings?.timesByDay) {
-          this.form.reminderTimesByDay = {};
-          for (const [day, timeStrings] of Object.entries(emailReminderSettings.timesByDay)) {
-            this.form.reminderTimesByDay[day] = timeStrings.map(str => {
-              const [hh, mm] = str.split(':').map(Number);
-              const period = hh >= 12 ? 'PM' : 'AM';
-              const hour12 = hh % 12 === 0 ? 12 : hh % 12;
-              return { hour: hour12, minute: mm, period };
-            });
-          }
-        }
-      }
-    },    
     formatTime({ hour, minute, period }) {
       let h = hour % 12;
       if (period === 'PM') h += 12;
@@ -233,6 +244,15 @@ export default {
       } catch (err) {
         alert(err.message);
       }
+    },
+    resetForm() {
+      this.form = {
+        name: '',
+        notes: '',
+        daysOfWeek: [],
+        emailReminderEnabled: false,
+        reminderTimesByDay: {}
+      };
     },
     clampHour(day, i) {
       const time = this.form.reminderTimesByDay[day][i];

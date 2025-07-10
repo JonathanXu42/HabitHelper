@@ -1,9 +1,10 @@
 import express from 'express';
 import prisma from '../prisma/client.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/', ensureAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.id; // assumes passport session middleware is in place
 
@@ -33,7 +34,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/delete-account', async (req, res) => {
+router.delete('/delete-account', ensureAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.id;
 

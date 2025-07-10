@@ -1,9 +1,10 @@
 import express from 'express';
 import prisma from '../prisma/client.js';;
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', ensureAuthenticated, async (req, res) => {
   const userId = req.user.id;
 
   try {
@@ -18,13 +19,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    return res.status(401).json({ error: 'Not authenticated' }); // minimal check
-  }
-
+router.post('/', ensureAuthenticated, async (req, res) => {
+  const userId = req.user.id;
   const { name, notes, daysOfWeek, emailReminderSettings } = req.body;
 
   try {
@@ -47,11 +43,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', ensureAuthenticated, async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
   const { name, notes, daysOfWeek, emailReminderSettings } = req.body;
 
   try {
+    const habit = await prisma.habit.findUnique({ where: { id } });
+
+    if (!habit || habit.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     const updatedHabit = await prisma.habit.update({
       where: { id },
       data: {
@@ -70,10 +73,17 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', ensureAuthenticated, async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   try {
+    const habit = await prisma.habit.findUnique({ where: { id } });
+
+    if (!habit || habit.userId !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     // Delete logs first (if applicable)
     await prisma.habitLog.deleteMany({ where: { habitId: id } });
 

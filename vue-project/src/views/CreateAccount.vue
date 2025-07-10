@@ -1,0 +1,144 @@
+<template>
+    <div class="create-account">
+        <form @submit.prevent="handleInitialSubmit">
+            <TextInput type="firstName" v-model="signupFirstName" placeholder="First Name" autocomplete="given-name" />
+            <TextInput type="lastName" v-model="signupLastName" placeholder="Last Name" autocomplete="family-name" />
+            <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
+            <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
+            <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
+            
+            <label for="timezone">Timezone</label>
+            <multiselect
+                id="timezone"
+                v-model="signupTimezone"
+                :options="timezones"
+                track-by="name"
+                label="label"
+                placeholder="Select your timezone"
+                required
+            />
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <form v-if="codeSent" @submit.prevent="verifyCode">
+            <TextInput
+                type="text"
+                :modelValue="enteredCode"
+                @update:modelValue="enteredCode = $event"
+                placeholder="Enter 6-digit code"
+                required
+            />
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+</template>
+
+<script>
+import TextInput from '../components/TextInput.vue';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.min.css';
+import { useTimezoneStore } from '../stores/timezoneStore';
+
+export default {
+    name: 'Create-Account',
+        components: {
+        TextInput,
+        Multiselect
+    },
+    data() {
+        return {
+            signupFirstName: '',
+            signupLastName: '',
+            signupEmail: '',
+            signupPassword: '',
+            signupTimezone: null,
+            signupConfirm: '',
+            signupTimezone: null,
+            timezoneStore: null,
+            timezones: [],
+            codeSent: false,
+            enteredCode: '',
+            verificationCode: '',
+            codeVerified: false
+        };
+    },
+    created() {
+        this.timezoneStore = useTimezoneStore();
+        this.timezoneStore.initTimezones();
+        this.timezones = this.timezoneStore.timezones;
+        this.signupTimezone = this.timezoneStore.guessDefault();
+    },
+    methods: {
+        async handleInitialSubmit() {
+            if (this.signupPassword !== this.signupConfirm) {
+            return alert('Passwords do not match');
+            }
+
+            if (!this.signupEmail.includes('@')) {
+            return alert('Please enter a valid email address.');
+            }
+
+            try {
+            const response = await fetch('/api/send-verification-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: this.signupEmail })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                this.verificationCode = result.code.toString();
+                this.codeSent = true;
+                alert(`Verification code sent to ${this.signupEmail}`);
+            } else {
+                throw new Error(result.message);
+            }
+            } catch (error) {
+                console.error('Error sending verification code:', error);
+                alert('There was a problem sending the verification code.');
+            }
+        },
+
+        verifyCode() {
+            if (this.enteredCode === this.verificationCode) {
+                alert('Verification successful!');
+                this.codeVerified = true;
+                this.createAccount();
+            } else {
+                alert('Incorrect verification code.');
+            }
+        },        
+        async createAccount() {
+            try {
+                const response = await fetch('http://localhost:3000/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', 
+                    body: JSON.stringify({
+                        firstName: this.signupFirstName,
+                        lastName: this.signupLastName,
+                        email: this.signupEmail,
+                        password: this.signupPassword,
+                        timezone: this.signupTimezone.name
+                    })
+                });
+
+                if (!response.ok) {
+                const error = await response.json();
+                return alert(error.error || 'Signup failed');
+                }
+
+                const user = await response.json();
+                this.$router.push('/landing');
+            } catch (err) {
+                console.error('Signup request failed:', err)
+                alert('Signup request failed');
+            }
+        }
+    }
+}
+</script>
+
+<style>
+</style>
