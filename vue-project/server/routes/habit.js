@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' }); // minimal check
   }
 
-  const { name, notes, daysOfWeek } = req.body;
+  const { name, notes, daysOfWeek, emailReminderSettings } = req.body;
 
   try {
     const newHabit = await prisma.habit.create({
@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
         daysOfWeek,
         currentStreak: 0,
         longestStreak: 0,
-        emailReminderSettings: { enabled: false, timesOfDay: [] }
+        emailReminderSettings
       }
     });
 
