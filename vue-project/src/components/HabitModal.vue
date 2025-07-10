@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay">
     <div class="modal">
-      <h2>Add a New Habit</h2>
+      <h2>{{ editMode ? 'Edit Habit' : 'Add a New Habit' }}</h2>
       <form @submit.prevent="submitHabit">
         <div>
           <label>Name:</label>
@@ -53,8 +53,16 @@
           </div>
         </div>
 
-        <button type="submit">Add Habit</button>
+        <button type="submit">{{ editMode ? 'Save Changes' : 'Add Habit' }}</button>
         <button type="button" @click="$emit('close')">Cancel</button>
+        <button
+          v-if="editMode"
+          type="button"
+          @click="confirmDelete"
+          style="margin-left: 10px; background-color: crimson; color: white;"
+        >
+          Delete
+        </button>
       </form>
     </div>
   </div>
@@ -75,6 +83,16 @@ export default {
       days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     };
   },
+  props: {
+    editMode: {
+      type: Boolean,
+      default: false
+    },
+    habitData: {
+      type: Object,
+      default: null
+    }
+  },
   watch: {
     // Initialize empty arrays when daysOfWeek changes
     'form.daysOfWeek'(newDays) {
@@ -89,6 +107,30 @@ export default {
     }
   },
   methods: {
+    created() {
+      if (this.habitData) {
+        const { name, notes, daysOfWeek, emailReminderSettings } = this.habitData;
+
+        // Copy habit data into form
+        this.form.name = name;
+        this.form.notes = notes || '';
+        this.form.daysOfWeek = [...daysOfWeek];
+        this.form.emailReminderEnabled = emailReminderSettings?.enabled || false;
+
+        // Convert "08:00" format to { hour, minute, period }
+        if (emailReminderSettings?.timesByDay) {
+          this.form.reminderTimesByDay = {};
+          for (const [day, timeStrings] of Object.entries(emailReminderSettings.timesByDay)) {
+            this.form.reminderTimesByDay[day] = timeStrings.map(str => {
+              const [hh, mm] = str.split(':').map(Number);
+              const period = hh >= 12 ? 'PM' : 'AM';
+              const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+              return { hour: hour12, minute: mm, period };
+            });
+          }
+        }
+      }
+    },    
     formatTime({ hour, minute, period }) {
       let h = hour % 12;
       if (period === 'PM') h += 12;
@@ -147,15 +189,46 @@ export default {
       };
 
       try {
-        const response = await fetch('http://localhost:3000/api/habits', {
-          method: 'POST',
+        const url = this.editMode
+          ? `http://localhost:3000/api/habits/${this.habitData.id}`
+          : 'http://localhost:3000/api/habits';
+
+        const method = this.editMode ? 'PATCH' : 'POST';
+
+        const response = await fetch(url, {
+          method,
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error('Failed to create habit');
+        if (!response.ok) {
+          if (method === 'PATCH') {
+            throw new Error('Failed to update habit');
+          }
+          else {
+            throw new Error ('Failed to create')
+          }
+        }
 
+        this.$emit('created');
+        this.$emit('close');
+      } catch (err) {
+        alert(err.message);
+      }
+    },
+    async confirmDelete() {
+      if (!confirm('Are you sure you want to delete this habit? This cannot be undone.')) return;
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/habits/${this.habitData.id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete habit');
+
+        this.$emit('deleted');
         this.$emit('close');
       } catch (err) {
         alert(err.message);

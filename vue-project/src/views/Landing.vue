@@ -12,11 +12,17 @@
 
   <button class="add-button" @click="showModal = true">+</button>
 
-  <HabitModal v-if="showModal" @close="showModal = false" />
+  <!-- Grid of Habits -->
+  <div class="habit-grid" v-if="habits.length">
+    <HabitCard v-for="habit in habits" :key="habit.id" :habit="habit" @edit="openEditModal" />
+  </div>
+
+  <HabitModal v-if="showModal" :editMode="editMode" :habitData="habitToEdit" @close="showModal = false" @created="fetchHabits" @deleted="fetchHabits" />
 </template>
 
 <script>
 import Header from '../components/Header.vue'
+import HabitCard from '../components/HabitCard.vue'
 import HabitModal from '../components/HabitModal.vue'
 import { useUserStore } from '../stores/userStore'
 
@@ -24,16 +30,44 @@ export default {
   name: 'Landing',
   components: { 
     Header,
-    HabitModal
+    HabitModal,
+    HabitCard
   },
   data() {
     return {
       userStore: null,
-      showModal: false
+      showModal: false,
+      editMode: false,
+      habitToEdit: null,
+      habits: []
     }
   },
-  created() {
+  async created() {
     this.userStore = useUserStore();
+    await this.fetchHabits();
+  },
+  methods: {
+    async fetchHabits() {
+      try {
+        const response = await fetch('http://localhost:3000/api/habits', {
+          credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Failed to fetch habits');
+        this.habits = await response.json();
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    openEditModal(habit) {
+      this.habitToEdit = habit;
+      this.editMode = true;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.habitToEdit = null;
+      this.editMode = false;
+    }
   }
 };
 </script>
@@ -41,7 +75,18 @@ export default {
 <style scoped>
 .landing {
   text-align: center;
-  margin-top: 100px;
+  margin: 40px auto;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .add-button {

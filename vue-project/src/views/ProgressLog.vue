@@ -241,6 +241,13 @@
     in with. I edited the Google Strategy in my passport.js file so that Google will always ask the user to select what gmail account they want to
     log in with.
     </p>
+
+    <p>July 10th, 2025</p>
+
+    <p>
+    Good work today. I made all of a user's habits display on the landing page and gave the user the ability to edit and delete habits from the
+    landing page.
+    </p>
   </div>
 </template>
 
