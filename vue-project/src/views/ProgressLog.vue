@@ -257,6 +257,22 @@
     visit certain pages, but this wouldn't have stopped someone from using a tool like Postman or Curl to make requests to my backend without
     interacting with the frontend.
     </p>
+
+    <p>July 11th, 2025</p>
+
+    <p>
+    In the same vein, I'm gonna start saving the verification code that users need to reset their password or create an account with an
+    email/password combination, in the backend instead of the frontend. This is so that malicious actors can't type in random people's emails
+    and create a bunch of accounts by digging through the frontend source files for the variable where the verification code is stored. While
+    techniques like minification and obfuscation of frontend source files make reading them more difficult, at the end of the day, all frontend
+    code gets sent to the user's computer to be executed there, and so you can't stop the user or his computer from figuring out what the
+    frontend source files do if you want to have a functioning website. Backend files execute on a server, not the user's computer, so the
+    verification codes should be much safer when stored in the backend.
+    </p>
+
+    <p>
+    I also added a 5 minute expiration timer to the verification codes.
+    </p>
   </div>
 </template>
 
