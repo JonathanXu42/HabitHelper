@@ -14,6 +14,8 @@ import habitRoutes from './routes/habit.js';
 import sessionMiddleware from './middleware/session.js';
 import './passport.js';
 
+import './utils/reminderScheduler.js';
+
 // Load environment variables
 dotenv.config();
 

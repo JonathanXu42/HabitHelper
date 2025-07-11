@@ -267,11 +267,14 @@
     techniques like minification and obfuscation of frontend source files make reading them more difficult, at the end of the day, all frontend
     code gets sent to the user's computer to be executed there, and so you can't stop the user or his computer from figuring out what the
     frontend source files do if you want to have a functioning website. Backend files execute on a server, not the user's computer, so the
-    verification codes should be much safer when stored in the backend.
+    verification codes should be much safer when stored in the backend. I also added a 5 minute expiration timer to the verification codes.
     </p>
 
     <p>
-    I also added a 5 minute expiration timer to the verification codes.
+    I implemented email reminders today using the luxon package to keep track of the date and time and the node-cron package to check for jobs
+    that have to be performed on an interval. In my case, since users can set an email reminder for any time of day, the cron scheduler will
+    have to check every user for emails that ought to be sent out, every minute of everyday, 24/7. I'm worried this could cost me a lot
+    in server resources in a production environment.
     </p>
   </div>
 </template>
