@@ -59,7 +59,6 @@ export default {
       email: '',
       codeSent: false,
       enteredCode: '',
-      verificationCode: '',
       codeVerified: false
     };
   },
@@ -91,13 +90,30 @@ export default {
       }
     },
 
-    verifyCode() {
-      if (this.enteredCode === this.verificationCode) {
-        alert('Verification successful!');
-        this.codeVerified = true;
-      } else {
-        alert('Incorrect verification code.');
-      }
+    async verifyCode() {
+        try {
+            const response = await fetch('/api/verify-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: this.email,
+                    code: this.enteredCode
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Verification successful!');
+                this.codeVerified = true;
+            } else {
+                alert(result.message || 'Verification failed');
+            }
+        } catch (error) {
+            console.error('Verification failed:', error);
+            alert('Verification failed');
+        }
     },
 
     async submitNewPassword() {

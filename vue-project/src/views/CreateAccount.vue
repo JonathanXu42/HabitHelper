@@ -59,7 +59,6 @@ export default {
             timezones: [],
             codeSent: false,
             enteredCode: '',
-            verificationCode: '',
             codeVerified: false
         };
     },
@@ -72,43 +71,75 @@ export default {
     methods: {
         async handleInitialSubmit() {
             if (this.signupPassword !== this.signupConfirm) {
-            return alert('Passwords do not match');
+                return alert('Passwords do not match');
             }
 
             if (!this.signupEmail.includes('@')) {
-            return alert('Please enter a valid email address.');
+                return alert('Please enter a valid email address.');
             }
 
             try {
-            const response = await fetch('/api/send-verification-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: this.signupEmail })
-            });
+                const checkRes = await fetch('http://localhost:3000/auth/check-existing-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: this.signupEmail })
+                });
 
-            const result = await response.json();
-            if (result.success) {
-                this.verificationCode = result.code.toString();
-                this.codeSent = true;
-                alert(`Verification code sent to ${this.signupEmail}`);
-            } else {
-                throw new Error(result.message);
+                const checkResult = await checkRes.json();
+                if (!checkResult.success) {
+                    return alert(checkResult.message || 'Email is already registered');
+                }
+            } catch (err) {
+                console.error('Error checking email:', err);
+                return alert('Failed to check email availability');
             }
+
+            try {
+                const response = await fetch('/api/send-verification-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: this.signupEmail })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    this.codeSent = true;
+                    alert(`Verification code sent to ${this.signupEmail}`);
+                } else {
+                    throw new Error(result.message);
+                }
             } catch (error) {
                 console.error('Error sending verification code:', error);
                 alert('There was a problem sending the verification code.');
             }
         },
 
-        verifyCode() {
-            if (this.enteredCode === this.verificationCode) {
-                alert('Verification successful!');
-                this.codeVerified = true;
-                this.createAccount();
-            } else {
-                alert('Incorrect verification code.');
+        async verifyCode() {
+            try {
+                const response = await fetch('/api/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: this.signupEmail,
+                        code: this.enteredCode
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Verification successful!');
+                    this.codeVerified = true;
+                    this.createAccount();
+                } else {
+                    alert(result.message || 'Verification failed');
+                }
+            } catch (error) {
+                console.error('Verification failed:', error);
+                alert('Verification failed');
             }
-        },        
+        },
         async createAccount() {
             try {
                 const response = await fetch('http://localhost:3000/auth/signup', {
@@ -125,8 +156,8 @@ export default {
                 });
 
                 if (!response.ok) {
-                const error = await response.json();
-                return alert(error.error || 'Signup failed');
+                    const error = await response.json();
+                    return alert(error.error || 'Signup failed');
                 }
 
                 const user = await response.json();

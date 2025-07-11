@@ -34,7 +34,7 @@ export async function emailVerificationCode(recipientEmail) {
         from: process.env.GMAIL_ADDRESS,
         to: recipientEmail,
         subject: "Your HabitHelper Verification Code",
-        text: `Your verification code is ${code}`
+        text: `Your verification code is ${code}. This code will expire in 5 minutes`
     }
 
     try {
