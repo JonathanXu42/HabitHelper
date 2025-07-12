@@ -19,6 +19,26 @@ router.get('/', ensureAuthenticated, async (req, res) => {
   }
 });
 
+
+router.get('/:habitId', ensureAuthenticated, async (req, res) => {
+  const { habitId } = req.params;
+
+  try {
+    const habit = await prisma.habit.findUnique({
+      where: { id: habitId }
+    });
+
+    if (!habit) {
+      return res.status(404).json({ error: 'Habit not found' });
+    }
+
+    res.json(habit);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch habit' });
+  }
+});
+
 router.post('/', ensureAuthenticated, async (req, res) => {
   const userId = req.user.id;
   const { name, notes, daysOfWeek, emailReminderSettings } = req.body;

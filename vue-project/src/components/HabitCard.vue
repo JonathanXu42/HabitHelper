@@ -11,6 +11,7 @@
     </p>
 
     <button @click="$emit('edit', habit)">✏️ Edit</button>
+    <button @click="viewLogs(habit.id)">View Logs</button>
   </div>
 </template>
 
@@ -21,10 +22,13 @@ export default {
   props: {
     habit: Object
   },
-    methods: {
+  methods: {
     displayDays(days) {
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       return days.map(d => dayNames[d]).join(', ');
+    },
+    viewLogs(habitId) {
+      this.$router.push({ name: 'HabitLog', params: { habitId } });
     }
   }
 };

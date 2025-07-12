@@ -276,6 +276,26 @@
     have to check every user for emails that ought to be sent out, every minute of everyday, 24/7. I'm worried this could cost me a lot
     in server resources in a production environment.
     </p>
+
+    <p>July 12th, 2025</p>
+
+    <p>
+    I did some work implementing habit logs today. Now every habit that appears on a user's landing page has a View Logs button that takes
+    the user to a page dedicated to logs for that habit. Technically speaking, habit logs always appear on the same page – HabitLog.vue –
+    but only one habit's logs are shown at a time. When the user clicks the View Logs on a habit card in the landing page, the website
+    passes the habitID in the URL, and the habit log page knows which habit's logs to retrieve.
+    </p>
+
+    <p>
+    The user can currently only view and create logs. I'm debating whether or not the user should be able to edit and delete logs. The first
+    time each day that the user creates a log that's marked "completed" (meaning the user worked on that habit that day), the habit's current 
+    streak counter in the landing page gets incremented by 1. If the current streak is longer than the longest streak, the longest streak
+    also gets updated.
+    </p>
+
+    <p>
+    Deleting a habit deletes all of the habit logs.
+    </p>
   </div>
 </template>
 

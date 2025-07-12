@@ -4,6 +4,7 @@ import { useUserStore } from '../stores/userStore' //
 import Login from '../views/Login.vue';
 import CreateAccount from '../views/CreateAccount.vue';
 import Landing from '../views/Landing.vue';
+import HabitLog from '../views/HabitLog.vue';
 import ResetPassword from '../views/ResetPassword.vue';
 import ProgressLog from '../views/ProgressLog.vue';
 import Settings from '../views/Settings.vue';
@@ -13,6 +14,7 @@ const routes = [
   { path: '/', name: 'Login', component: Login },
   { path: '/create-account', name: 'Create-Account', component: CreateAccount },
   { path: '/landing', name: 'Landing', component: Landing, meta: { requiresAuth: true } },
+  { path: '/habit/:habitId/logs', name: 'HabitLog', component: HabitLog, meta: { requiresAuth: true} },
   { path: '/reset-password', name: 'Reset-Password', component: ResetPassword },
   { path: '/progress-log', name: 'Progress-Log', component: ProgressLog },
   { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true } },

@@ -10,6 +10,7 @@ import authRoutes from './routes/auth/index.js';
 import meRoutes from './routes/me.js';
 import userSettingsRoutes from './routes/user-settings.js';
 import habitRoutes from './routes/habit.js';
+import habitLogRoutes from './routes/habit-log.js';
 
 import sessionMiddleware from './middleware/session.js';
 import './passport.js';
@@ -41,6 +42,7 @@ app.use('/auth', authRoutes);
 app.use('/api', meRoutes);
 app.use('/user-settings', userSettingsRoutes);
 app.use('/api/habits', habitRoutes);
+app.use('/api/habit-logs', habitLogRoutes);
 
 // 404 for unknown API routes
 app.use('/api', (req, res) => {
