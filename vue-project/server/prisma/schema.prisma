@@ -25,6 +25,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   habits    Habit[]
+  scheduledReminders ScheduledReminder[]
 }
 
 model Habit {
@@ -45,6 +46,7 @@ model Habit {
   updatedAt  DateTime @updatedAt
 
   logs       HabitLog[]
+  scheduledReminders ScheduledReminder[]
 }
 
 model HabitLog {
@@ -58,4 +60,15 @@ model HabitLog {
   progress  Int?
   notes     String?
   createdAt DateTime @default(now())
+}
+
+model ScheduledReminder {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  habitId    String   @db.ObjectId
+  userId     String   @db.ObjectId
+  sendAt     DateTime // UTC 
+  createdAt  DateTime @default(now())
+
+  habit      Habit    @relation(fields: [habitId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }

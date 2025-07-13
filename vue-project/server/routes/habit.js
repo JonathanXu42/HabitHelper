@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../prisma/client.js';;
 import { ensureAuthenticated } from '../middleware/auth.js';
+import { scheduleRemindersForHabit, clearRemindersForHabit } from '../utils/reminderScheduler.js';
 
 const router = express.Router();
 
@@ -56,6 +57,11 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       }
     });
 
+    if (emailReminderSettings && Object.keys(emailReminderSettings).length > 0) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      await scheduleRemindersForHabit(newHabit, user);
+    }
+
     res.json(newHabit);
   } catch (err) {
     console.error(err);
@@ -86,6 +92,14 @@ router.patch('/:id', ensureAuthenticated, async (req, res) => {
       }
     });
 
+    // Clear old reminders
+    await clearRemindersForHabit(id);
+
+    if (emailReminderSettings && Object.keys(emailReminderSettings).length > 0) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      await scheduleRemindersForHabit(updatedHabit, user);
+    }    
+
     res.json(updatedHabit);
   } catch (err) {
     console.error(err);
@@ -106,6 +120,9 @@ router.delete('/:id', ensureAuthenticated, async (req, res) => {
 
     // Delete logs first (if applicable)
     await prisma.habitLog.deleteMany({ where: { habitId: id } });
+
+    // Delete scheduled reminders
+    await clearRemindersForHabit(id);
 
     // Delete habit
     await prisma.habit.delete({ where: { id } });

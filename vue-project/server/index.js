@@ -16,6 +16,7 @@ import sessionMiddleware from './middleware/session.js';
 import './passport.js';
 
 import './utils/reminderScheduler.js';
+import './utils/streakResetter.js';
 
 // Load environment variables
 dotenv.config();

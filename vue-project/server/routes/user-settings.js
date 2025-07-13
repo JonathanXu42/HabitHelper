@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../prisma/client.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
+import { rescheduleRemindersForTimezoneChange } from '../utils/reminderScheduler.js';
 
 const router = express.Router();
 
@@ -18,6 +19,8 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       return res.status(400).json({ message: 'Timezone is required' });
     }
 
+    const oldUser = await prisma.user.findUnique({ where: { id: userId } });
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
@@ -26,6 +29,10 @@ router.post('/', ensureAuthenticated, async (req, res) => {
         timezone,
       },
     });
+
+    if (timezone !== oldUser.timezone) {
+      await rescheduleRemindersForTimezoneChange(userId, timezone);
+    }
 
     res.status(200).json({ message: 'User settings updated', user: updatedUser });
   } catch (error) {
@@ -58,8 +65,12 @@ router.delete('/delete-account', ensureAuthenticated, async (req, res) => {
       return res.status(400).json({ message: 'Email confirmation does not match' });
     }
 
-    // Delete HabitLogs -> Habits -> User (in that order to satisfy FK constraints)
+    // Delete HabitLogs and ScheduledReminders -> Habits -> User (in that order to satisfy FK constraints)
     await prisma.habitLog.deleteMany({
+      where: { userId }
+    });
+
+    await prisma.scheduledReminder.deleteMany({
       where: { userId }
     });
 

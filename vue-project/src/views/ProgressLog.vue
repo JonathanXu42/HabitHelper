@@ -296,6 +296,23 @@
     <p>
     Deleting a habit deletes all of the habit logs.
     </p>
+
+    <p>July 13th, 2025</p>
+
+    <p>
+    I came up with a more efficient system for scheduling email reminders. Instead of checking all habits from every user every minute of
+    the day, I'm going to use a scheduled queue system using a ScheduledReminder model I added to the Prisma schema. Every time a user
+    adds, edits, or deletes a habit, or when a user changes their timezone, the website will add, edit, or delete scheduled reminders
+    belonging to that habit or that user. When an email reminder is sent, a new reminder is scheduled for the same time, a week from now.
+    </p>
+
+    <p>
+    The system still performs checks every minute, but instead of searching through all habits belonging to all users, it searches through
+    all scheduled reminders. The number of scheduled reminders may be greater than the number of habits, so you might think that this new
+    system would be even slower, but I've added an index on the sendAt attribute, which means that the system finds scheduled reminders that
+    are about to be sent, first. This makes the search function run in 1/1440th the time (1440 minutes per day and assuming that users are
+    equally likely to schedule reminders at any given time of day, which they are not).
+    </p>
   </div>
 </template>
 

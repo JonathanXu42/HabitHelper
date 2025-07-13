@@ -3,44 +3,119 @@ import prisma from '../prisma/client.js';
 import { emailReminder } from './send_email.js';
 import { DateTime } from 'luxon';
 
-cron.schedule('* * * * *', async () => {
-  console.log('Checking for due reminders...');
+export async function scheduleRemindersForHabit(habit, user) {
+  const settings = habit.emailReminderSettings; // assumed to be { "5": "08:30", ... }
+  const timezone = user.timezone;
 
-  const users = await prisma.user.findMany({
-    include: { habits: true }
-  });
+  console.log("settings is ", settings)
 
-  console.log("Users found: ", users)
+  if (!settings.enabled || !settings.timesByDay) {
+    return;
+  }
 
-  const nowUtc = DateTime.utc();
+  const timesByDay = settings.timesByDay;
 
-  for (const user of users) {
-    console.log("Habits belongiing to: ", user.email)
-    console.log(user.habits)
+  for (const [dayString, times] of Object.entries(timesByDay)) {
+    const day = parseInt(dayString); // "5" => 5
 
-    if (user.habits.length === 0) continue;
+    for (const time of times) {
+      const [hour, minute] = time.split(':').map(Number);
+      const now = DateTime.now().setZone(timezone);
 
-    const nowInUserTz = nowUtc.setZone(user.timezone);
-    const weekday = nowInUserTz.weekday % 7; // Luxon: 1=Mon, ..., 7=Sun. Adjust to 0=Sun..6=Sat
-    const timeStr = nowInUserTz.toFormat('HH:mm');
+      let next = now.set({ hour, minute, second: 0, millisecond: 0 });
 
-    console.log("weekday is ", weekday);
-    console.log("weekday.toString is ", weekday.toString());
-    console.log("timeStr is ", timeStr);
+      // Advance to the next occurrence of this weekday and time
+      while (next.weekday % 7 !== (day % 7) || next <= now) {
+        next = next.plus({ days: 1 });
+      }
 
-    for (const habit of user.habits) {
-    const reminderSettings = habit.emailReminderSettings;
-        console.log("reminder settings for: ", habit.name);
-        console.log(reminderSettings);
+      console.log("scheduling email reminder at:", next.toUTC().toISO(), "for habit:", habit.name, "belonging to user:", user.email);
 
-        if (!reminderSettings?.enabled) continue;
-
-        const timesToday = reminderSettings.timesByDay?.[weekday.toString()] || [];
-        console.log("Reminder times for today:", timesToday);
-        if (timesToday.includes(timeStr)) {
-            console.log("sending user an email reminder");
-            await emailReminder(user.email, habit.name, habit.currentStreak);
+      await prisma.scheduledReminder.create({
+        data: {
+          habitId: habit.id,
+          userId: user.id,
+          sendAt: next.toUTC().toJSDate()
         }
+      });
     }
   }
+}
+
+export async function clearRemindersForHabit(habitId) {
+  console.log("deleting email reminders for habit: ", habitId)
+  await prisma.scheduledReminder.deleteMany({ where: { habitId } });
+}
+
+export async function rescheduleRemindersForTimezoneChange(userId, newTimezone) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      habits: true
+    }
+  });
+
+  for (const habit of user.habits) {
+    console.log("rescheduling reminders for: ", habit.name)
+    const settings = habit.emailReminderSettings;
+    if (!settings?.enabled || !settings.timesByDay) continue;
+
+    const timesByDay = settings.timesByDay;
+
+    for (const [dayString, times] of Object.entries(timesByDay)) {
+      const day = parseInt(dayString);
+
+      for (const time of times) {
+        const [hour, minute] = time.split(':').map(Number);
+        const now = DateTime.now().setZone(newTimezone);
+
+        let next = now.set({ hour, minute, second: 0, millisecond: 0 });
+        while (next.weekday % 7 !== day % 7 || next <= now) {
+          next = next.plus({ days: 1 });
+        }
+
+        // Find and update the existing reminder that matches this habitId/userId/day/time
+        // Since we don't track the original day/time per reminder, we have to update all
+        // future reminders for this habit/user to new time. This is a limitation unless you store extra metadata.
+        await prisma.scheduledReminder.updateMany({
+          where: {
+            habitId: habit.id,
+            userId: userId
+          },
+          data: {
+            sendAt: next.toUTC().toJSDate()
+          }
+        });
+      }
+    }
+  }
+}
+
+cron.schedule('* * * * *', async () => {
+  const now = DateTime.utc().toJSDate();
+  const dueReminders = await prisma.scheduledReminder.findMany({
+    where: {
+      sendAt: {
+        lte: now
+      }
+    },
+    include: {
+      habit: true,
+      user: true
+    }
+  });
+
+  console.log("checking for scheduled reminders at local time: ", now)
+  console.log("due reminders: ", dueReminders)
+
+  for (const reminder of dueReminders) {
+    try {
+      await emailReminder(reminder.user.email, reminder.habit.name, reminder.habit.currentStreak);
+      await prisma.scheduledReminder.delete({ where: { id: reminder.id } });
+
+      await scheduleRemindersForHabit(reminder.habit, reminder.user);
+    } catch (err) {
+      console.error(`Failed to send or reschedule reminder for ${user.email}`, err);
+    }
+  } 
 });
