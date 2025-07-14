@@ -1,6 +1,6 @@
 <template>
   <div class="progressLog">
-    <Header></Header>
+    <Header v-if="userStore.isLoggedIn"></Header>
     <h1>Progress Log</h1>
 
     <p>July 3rd, 2025</p>
@@ -313,16 +313,33 @@
     are about to be sent, first. This makes the search function run in 1/1440th the time (1440 minutes per day and assuming that users are
     equally likely to schedule reminders at any given time of day, which they are not).
     </p>
+
+    <p>July 14th, 2025</p>
+
+    <p>Today was mainly bug fixes and minor improvements:</p>
+    <p>- Fixed bug where streaks were being reset everyday even on days when users weren't planning on working on their habits</p>
+    <p>- Built function to send users emails whenever they break a streak</p>
+    <p>- Popup menu gets too tall when users add too many email reminder times to a habit, so I added the ability for users to scroll up or down the menu</p>
+    <p>- Made the header component appear on the reset password and progress log pages only if the user is logged in</p>
   </div>
 </template>
 
 <script>
 import Header from '../components/Header.vue';
+import { useUserStore } from '../stores/userStore';
 
 export default {
     name: 'ProgressLog',
     components: { 
       Header 
+    },
+    data() {
+      return {
+        userStore: null
+      };
+    },
+    created() {
+      this.userStore = useUserStore();
     }
 };
 </script>

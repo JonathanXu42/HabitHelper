@@ -6,8 +6,6 @@
     <div v-if="userStore.isLoggedIn">
       Welcome, {{ userStore.user.firstName + " " +  userStore.user.lastName }}!
     </div>
-
-    <a class="view-progress-log" @click.prevent="$router.push('/progress-log')">View progress log</a>
   </div>
 
   <button class="add-button" @click="openAddModal">+</button>

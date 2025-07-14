@@ -1,5 +1,6 @@
 <template>
   <div class="max-w-2xl mx-auto p-6">
+    <Header></Header>
     <h1 class="text-2xl font-bold mb-6">
       Logs for: {{ habit?.name }}
     </h1>
@@ -28,12 +29,14 @@
 </template>
 
 <script>
+import Header from '../components/Header.vue'
 import HabitLogCard from '../components/HabitLogCard.vue';
 import HabitLogModal from '../components/HabitLogModal.vue';
 
 export default {
   name: 'HabitLog',
   components: { 
+    Header,
     HabitLogCard,
     HabitLogModal 
   },

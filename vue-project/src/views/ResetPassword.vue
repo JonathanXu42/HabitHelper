@@ -1,5 +1,6 @@
 <template>
   <div class="reset-password">
+    <Header v-if="userStore.isLoggedIn"></Header>
     <h1>Reset Password</h1>
 
     <form @submit.prevent="emailVerificationCode">
@@ -47,11 +48,14 @@
 </template>
 
 <script>
+import Header from '../components/Header.vue';
 import TextInput from '../components/TextInput.vue';
+import { useUserStore } from '../stores/userStore';
 
 export default {
   name: 'ResetPassword',
   components: {
+    Header,
     TextInput
   },
   data() {
@@ -59,8 +63,12 @@ export default {
       email: '',
       codeSent: false,
       enteredCode: '',
-      codeVerified: false
+      codeVerified: false,
+      userStore: null
     };
+  },
+  created() {
+    this.userStore = useUserStore();
   },
   methods: {
     async emailVerificationCode() {

@@ -1,69 +1,71 @@
 <template>
   <div class="modal-overlay">
     <div class="modal">
-      <h2>{{ editMode ? 'Edit Habit' : 'Add a New Habit' }}</h2>
-      <form @submit.prevent="submitHabit">
-        <div>
-          <label>Name:</label>
-          <input v-model="form.name" required />
-        </div>
+      <div class="modal-content">
+        <h2>{{ editMode ? 'Edit Habit' : 'Add a New Habit' }}</h2>
+        <form @submit.prevent="submitHabit">
+          <div>
+            <label>Name:</label>
+            <input v-model="form.name" required />
+          </div>
 
-        <div>
-          <label>Notes:</label>
-          <textarea v-model="form.notes" />
-        </div>
+          <div>
+            <label>Notes:</label>
+            <textarea v-model="form.notes" />
+          </div>
 
-        <div>
-          <label>Days of the Week:</label>
-          <div class="days">
-            <label v-for="(day, index) in days" :key="index">
-              <input type="checkbox" :value="index" v-model="form.daysOfWeek" />
-              {{ day }}
+          <div>
+            <label>Days of the Week:</label>
+            <div class="days">
+              <label v-for="(day, index) in days" :key="index">
+                <input type="checkbox" :value="index" v-model="form.daysOfWeek" />
+                {{ day }}
+              </label>
+            </div>
+          </div>
+
+          <!-- Email Reminder Checkbox -->
+          <div>
+            <label>
+              <input type="checkbox" v-model="form.emailReminderEnabled" />
+              Enable Email Reminders
             </label>
           </div>
-        </div>
 
-        <!-- Email Reminder Checkbox -->
-        <div>
-          <label>
-            <input type="checkbox" v-model="form.emailReminderEnabled" />
-            Enable Email Reminders
-          </label>
-        </div>
-
-        <!-- Reminder Times by Day -->
-        <div v-if="form.emailReminderEnabled">
-          <div v-for="dayIndex in form.daysOfWeek" :key="dayIndex">
-            <h4>{{ days[dayIndex] }}</h4>
-            <div
-              v-for="(time, i) in form.reminderTimesByDay[dayIndex]"
-              :key="i"
-              class="time-entry"
-            >
-              <input type="number" v-model.number="time.hour" min="1" max="12" style="width: 60px;" @input="clampHour(dayIndex, i)" />
-              :
-              <input type="number" v-model.number="time.minute" min="0" max="59" style="width: 60px;" @input="clampMinute(dayIndex, i)"/>
-              <select v-model="time.period">
-                <option>AM</option>
-                <option>PM</option>
-              </select>
-              <button type="button" @click="removeTime(dayIndex, i)">🗑</button>
+          <!-- Reminder Times by Day -->
+          <div v-if="form.emailReminderEnabled">
+            <div v-for="dayIndex in form.daysOfWeek" :key="dayIndex">
+              <h4>{{ days[dayIndex] }}</h4>
+              <div
+                v-for="(time, i) in form.reminderTimesByDay[dayIndex]"
+                :key="i"
+                class="time-entry"
+              >
+                <input type="number" v-model.number="time.hour" min="1" max="12" style="width: 60px;" @input="clampHour(dayIndex, i)" />
+                :
+                <input type="number" v-model.number="time.minute" min="0" max="59" style="width: 60px;" @input="clampMinute(dayIndex, i)"/>
+                <select v-model="time.period">
+                  <option>AM</option>
+                  <option>PM</option>
+                </select>
+                <button type="button" @click="removeTime(dayIndex, i)">🗑</button>
+              </div>
+              <button type="button" @click="addTime(dayIndex)">+ Add Time</button>
             </div>
-            <button type="button" @click="addTime(dayIndex)">+ Add Time</button>
           </div>
-        </div>
 
-        <button type="submit">{{ editMode ? 'Save Changes' : 'Add Habit' }}</button>
-        <button type="button" @click="$emit('close')">Cancel</button>
-        <button
-          v-if="editMode"
-          type="button"
-          @click="confirmDelete"
-          style="margin-left: 10px; background-color: crimson; color: white;"
-        >
-          Delete
-        </button>
-      </form>
+          <button type="submit">{{ editMode ? 'Save Changes' : 'Add Habit' }}</button>
+          <button type="button" @click="$emit('close')">Cancel</button>
+          <button
+            v-if="editMode"
+            type="button"
+            @click="confirmDelete"
+            style="margin-left: 10px; background-color: crimson; color: white;"
+          >
+            Delete
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -275,6 +277,7 @@ export default {
   width: 100%; height: 100%;
   background-color: rgba(12, 11, 11, 0.5);
   display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
 }
 
 .modal {
@@ -283,6 +286,10 @@ export default {
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
+  max-height: 90vh;  
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .days {
@@ -296,5 +303,11 @@ export default {
   align-items: center;
   gap: 5px;
   margin-bottom: 8px;
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;      /* Make modal content scrollable */
+  flex-grow: 1;          /* So the scrollable part fills modal */
 }
 </style>
