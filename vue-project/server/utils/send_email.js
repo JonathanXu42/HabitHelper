@@ -63,3 +63,20 @@ export async function emailReminder(recipientEmail, habit, streak) {
         throw error;
     }
 }
+
+export async function emailStreakBroken(recipientEmail, habit, streak) {
+    const mailOptions = {
+        from: process.env.GMAIL_ADDRESS,
+        to: recipientEmail,
+        subject: `Oh no! You broke your streak for the habit ${habit}!`,
+        text: `Keep your chin up, there's always tomorrow. Your streak ended at ${streak} days.`
+    }
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Email sent to ${recipientEmail}:`, info.response);
+    } catch (error) {
+        console.error(`Failed to send email to ${recipientEmail}:`, error);
+        throw error;
+    }    
+}

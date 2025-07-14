@@ -1,6 +1,7 @@
 import prisma from '../prisma/client.js';
 import cron from 'node-cron';
 import { DateTime } from 'luxon';
+import { emailStreakBroken } from './send_email.js';
 
 //Run every hour at minute 0
 cron.schedule('0 * * * *', async () => {
@@ -10,6 +11,7 @@ cron.schedule('0 * * * *', async () => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
+        email: true,
         timezone: true
       }
     });
@@ -35,7 +37,14 @@ cron.schedule('0 * * * *', async () => {
       });
 
       for (const habit of habits) {
-        const Logs = await prisma.habitLog.findMany({
+        // What day of the week was "yesterday" in the user's local time?
+        const localYesterday = nowLocal.minus({ days: 1 });
+        const weekdayIndex = localYesterday.weekday % 7; // Luxon: Monday = 1, Sunday = 7
+
+        // Only reset streak if yesterday was a scheduled habit day and the habit's current streak is greater than 0
+        if (!habit.daysOfWeek.includes(weekdayIndex) || habit.currentStreak === 0) continue;
+
+        const logs = await prisma.habitLog.findMany({
           where: {
             habitId: habit.id,
             completed: true,
@@ -46,13 +55,18 @@ cron.schedule('0 * * * *', async () => {
           }
         });
 
-        if (logs.length === 0 && habit.currentStreak !== 0) {
+        if (logs.length === 0) {
+          console.log("found ", logs.length, " logs for ", habit.name)
           await prisma.habit.update({
             where: { id: habit.id },
             data: { currentStreak: 0 }
           });
 
-          console.log(`Reset streak for habit "${habit.name}" of user ${user.id}`);
+          try {
+            await emailStreakBroken(user.email, habit.name, habit.currentStreak);
+          } catch (err) {
+            console.error(`Failed to send streak broken email for ${user.email}`, err);
+          }
         }
       }
     }
