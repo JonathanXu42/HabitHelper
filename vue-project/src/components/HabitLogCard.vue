@@ -17,6 +17,17 @@
     <p v-if="log.notes" class="mt-2 text-sm text-gray-600 dark:text-gray-400 italic">
       {{ log.notes }}
     </p>
+
+    <button @click="$emit('edit', log)" class="mt-2 text-blue-600 hover:underline">
+      ✏️ Edit Log
+    </button>    
+    <button
+      type="button"
+      @click="confirmDelete"
+      style="margin-left: 10px; background-color: crimson; color: white;"
+    >
+      Delete
+    </button>
   </div>
 </template>
 
@@ -38,6 +49,22 @@ export default {
         month: 'short',
         day: 'numeric'
       });
+    },
+    async confirmDelete() {
+      if (!confirm('Are you sure you want to delete this habit? This cannot be undone.')) return;
+
+      try {
+        const response = await fetch(`/api/habit-logs/${this.log.habitId}/logs/${this.log.id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete habit');
+
+        this.$emit('deleted', this.log.id);
+      } catch (err) {
+        alert(err.message);
+      }
     }
   }
 };

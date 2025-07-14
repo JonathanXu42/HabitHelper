@@ -14,14 +14,17 @@
         v-for="log in sortedLogs"
         :key="log.id"
         :log="log"
+        @edit="openEditModal"
+        @deleted="handleDeleted"
       />
     </div>
 
      <HabitLogModal
       v-if="showModal"
       :habit-id="habit.id"
-      @close="showModal = false"
-      @added="handleLogAdded"
+      :log-to-edit="logBeingEdited"
+      @edited="handleEdited"
+      @added="handleAdded"
     />
 
     <button class="add-button" @click="showModal = true">+</button>
@@ -75,9 +78,27 @@ export default {
     this.logs = await logsRes.json();
   },
   methods: {
-    handleLogAdded(newLog) {
+    openAddModal() {
+      this.showModal = true;
+      this.logBeingEdited = null;
+    },
+    openEditModal(log) {
+      this.showModal = true;
+      this.logBeingEdited = log;
+    },
+    handleAdded(newLog) {
       this.logs.unshift(newLog);
       this.showModal = false;
+    },
+    handleEdited(updatedLog) {
+      const index = this.logs.findIndex(l => l.id === updatedLog.id);
+      if (index !== -1) this.logs.splice(index, 1, updatedLog);
+
+      this.showModal = false;
+      this.logBeingEdited = null;
+    },
+    handleDeleted(logId) {
+      this.logs = this.logs.filter(log => log.id !== logId);
     }
   }
 };

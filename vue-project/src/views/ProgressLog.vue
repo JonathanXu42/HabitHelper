@@ -321,6 +321,7 @@
     <p>- Built function to send users emails whenever they break a streak</p>
     <p>- Popup menu gets too tall when users add too many email reminder times to a habit, so I added the ability for users to scroll up or down the menu</p>
     <p>- Made the header component appear on the reset password and progress log pages only if the user is logged in</p>
+    <p>- Gave users the ability to edit and delete habit logs</p>
   </div>
 </template>
 

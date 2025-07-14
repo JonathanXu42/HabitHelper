@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay">
     <div class="modal-content">
-      <h2>Add Habit Log</h2>
+      <h2>{{ isEditMode ? 'Edit Habit Log' : 'Add Habit Log' }}</h2>
 
       <form @submit.prevent="submitLog">
         <label>Date:</label>
@@ -19,7 +19,7 @@
         <textarea v-model="form.notes"></textarea>
 
         <div class="modal-actions">
-          <button type="submit">Add Log</button>
+          <button type="submit">{{ isEditMode ? 'Save Changes' : 'Add Log' }}</button>
           <button type="button" @click="$emit('close')">Cancel</button>
         </div>
       </form>
@@ -34,6 +34,10 @@ export default {
     habitId: {
       type: String,
       required: true
+    },
+    logToEdit: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -47,6 +51,9 @@ export default {
     };
   },
   computed: {
+    isEditMode() {
+      return !!this.logToEdit;
+    },    
     today() {
         return new Date().toLocaleDateString(undefined, {
         weekday: 'short',
@@ -56,21 +63,35 @@ export default {
         });
     }
   },
+  mounted() {
+    if (this.isEditMode) {
+      this.form = {
+        completed: this.logToEdit.completed,
+        progress: this.logToEdit.progress,
+        notes: this.logToEdit.notes
+      };
+    }
+  },  
   methods: {
     async submitLog() {
-      const res = await fetch(`/api/habit-logs/${this.habitId}/logs`, {
-        method: 'POST',
+      const url = this.isEditMode
+        ? `/api/habit-logs/${this.habitId}/logs/${this.logToEdit.id}`
+        : `/api/habit-logs/${this.habitId}/logs`;
+
+      const method = this.isEditMode ? 'PATCH' : 'POST';        
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.form)
       });
 
-      const newLog = await res.json();
-      this.$emit('added', newLog);
+      const savedLog = await res.json();
+      this.$emit(this.isEditMode ? 'edited' : 'added', savedLog);
     }
   }
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
