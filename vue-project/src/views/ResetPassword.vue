@@ -1,6 +1,6 @@
 <template>
+  <Header v-if="userStore.isLoggedIn"></Header>
   <div class="reset-password">
-    <Header v-if="userStore.isLoggedIn"></Header>
     <h1>Reset Password</h1>
 
     <form @submit.prevent="emailVerificationCode">
@@ -158,8 +158,8 @@ export default {
 
 <style scoped>
 .reset-password {
-  text-align: center;
-  margin-top: 100px;
+  text-align: left;
+  margin-top: 50px;
 }
 
 button {

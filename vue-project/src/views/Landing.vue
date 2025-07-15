@@ -1,6 +1,6 @@
 <template>
+  <Header></Header>
   <div class="landing">
-    <Header></Header>
 
     <h1>Hello World</h1>
     <div v-if="userStore.isLoggedIn">

@@ -1,6 +1,6 @@
 <template>
-  <div class="settings">
   <Header></Header>
+  <div class="settings">
     <form @submit.prevent="changeUserSettings">
       <TextInput type="firstName" v-model="firstName" placeholder="First Name" autocomplete="given-name" />
       <TextInput type="lastName" v-model="lastName" placeholder="Last Name" autocomplete="family-name" />

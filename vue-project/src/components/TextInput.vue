@@ -32,15 +32,12 @@ export default {
 };
 </script>
 
-<style scoped>
-.input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
+<style>
 input {
+  width: 275px;
+  border: 3px solid #131111;
+  border-radius: 12px;
   padding: 8px;
-  font-size: 14px;
+  font-size: 16px;
 }
 </style>
