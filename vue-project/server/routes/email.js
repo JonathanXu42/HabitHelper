@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/send-verification-code', async (req, res) => {
   const { email } = req.body;
+  const userId = req.user?.id;
 
   console.log('Received email request:', email);
 
@@ -14,6 +15,13 @@ router.post('/send-verification-code', async (req, res) => {
   }
 
   try {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    // If the email is used by someone else, reject it
+    if (existingUser && existingUser.id !== userId) {
+      return res.status(409).json({ success: false, message: 'There is already an account tied to that email' });
+    }
+
     const code = await emailVerificationCode(email);
     
     // Save code + expiration to session

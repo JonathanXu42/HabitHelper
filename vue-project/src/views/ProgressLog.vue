@@ -280,7 +280,12 @@
 
     <ProgressLogEntry date="July 15th, 2025">
       Now that I'm pretty much done with the backend, I can focus on the frontend and making the UI look pretty. I worked on the login page,
-      header, and progress log page today.
+      header, settings page, and progress log page today.
+
+      On the settings page, I gave users the ability to change their emails, with the requirement that they receive a verification code at
+      their new email address and enter that in. This is to prevent users from accidentally switching their accounts over to the wrong email
+      then being locked out. I'm also making users go through this same process if they want to delete their accounts, since this is far more
+      secure than having the user simply retype their email to confirm account deletion.
     </ProgressLogEntry>    
   </div>
 </template>

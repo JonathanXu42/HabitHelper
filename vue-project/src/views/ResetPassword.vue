@@ -3,7 +3,7 @@
   <div class="reset-password">
     <h1>Reset Password</h1>
 
-    <form @submit.prevent="emailVerificationCode">
+    <form @submit.prevent="emailVerificationCode" class="inline-form">
       <TextInput
         type="email"
         :modelValue="email"
@@ -69,6 +69,9 @@ export default {
   },
   created() {
     this.userStore = useUserStore();
+    if (this.userStore.user) {
+      this.email = this.userStore.user.email;
+    }
   },
   methods: {
     async emailVerificationCode() {
@@ -163,6 +166,7 @@ export default {
 }
 
 button {
+  width: 275px;
   margin-top: 10px;
   padding: 10px;
   font-size: 16px;

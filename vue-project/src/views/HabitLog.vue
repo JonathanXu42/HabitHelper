@@ -25,9 +25,10 @@
       :log-to-edit="logBeingEdited"
       @edited="handleEdited"
       @added="handleAdded"
+      @close="closeModal"
     />
 
-    <button class="add-button" @click="showModal = true">+</button>
+    <button class="add-button" @click="openAddModal">+</button>
   </div>
 </template>
 
@@ -86,6 +87,10 @@ export default {
       this.showModal = true;
       this.logBeingEdited = log;
     },
+    closeModal() {
+      this.showModal = false;
+      this.logBeingEdited = null;
+    },
     handleAdded(newLog) {
       this.logs.unshift(newLog);
       this.showModal = false;
@@ -94,8 +99,7 @@ export default {
       const index = this.logs.findIndex(l => l.id === updatedLog.id);
       if (index !== -1) this.logs.splice(index, 1, updatedLog);
 
-      this.showModal = false;
-      this.logBeingEdited = null;
+      this.closeModal();
     },
     handleDeleted(logId) {
       this.logs = this.logs.filter(log => log.id !== logId);

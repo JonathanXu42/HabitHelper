@@ -13,7 +13,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const { firstName, lastName, timezone } = req.body;
+    const { firstName, lastName, email, timezone} = req.body;
 
     if (!timezone) {
       return res.status(400).json({ message: 'Timezone is required' });
@@ -26,7 +26,8 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       data: {
         firstName,
         lastName,
-        timezone,
+        email,
+        timezone
       },
     });
 
