@@ -12,8 +12,8 @@
 
     <div class="login-box">
       <form @submit.prevent="login">
-        <TextInput type="email" v-model="email" placeholder="Email" autocomplete="email" required />
-        <TextInput type="password" v-model="password" placeholder="Password" autocomplete="current-password" required />
+        <input class="text-input" type="email" v-model="email" placeholder="Email" autocomplete="email" required />
+        <input class="text-input" type="password" v-model="password" placeholder="Password" autocomplete="current-password" required />
 
         <a class="forgot-password" @click.prevent="$router.push('/reset-password')">Forgot password?</a>
 
@@ -31,12 +31,9 @@
 </template>
 
 <script>
-import TextInput from '../components/TextInput.vue';
-
 export default {
   name: 'Login',
   components: {
-    TextInput
   },
   data() {
     return {
@@ -149,6 +146,12 @@ form {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.text-input {
+  height: 40px;
+  font-size: 16px;
+  border-radius: 16px;
 }
 
 .forgot-password {

@@ -1,13 +1,13 @@
 <template>
   <Header v-if="userStore.isLoggedIn"></Header>
   <div class="reset-password">
-    <h1>Reset Password</h1>
+    <h1 class="title">Reset Password</h1>
 
-    <form @submit.prevent="emailVerificationCode" class="inline-form">
-      <TextInput
+    <form @submit.prevent="emailVerificationCode" class="form-inline">
+      <input
+        class="text-input"
         type="email"
-        :modelValue="email"
-        @update:modelValue="email = $event"
+        v-model="email"
         placeholder="Email"
         required
       />
@@ -15,10 +15,10 @@
     </form>
 
     <form v-if="codeSent" @submit.prevent="verifyCode">
-      <TextInput
+      <input
+        class="text-input"
         type="text"
-        :modelValue="enteredCode"
-        @update:modelValue="enteredCode = $event"
+        v-model="enteredCode"
         placeholder="Enter 6-digit code"
         required
       />
@@ -26,18 +26,18 @@
     </form>
 
     <form v-if="codeVerified" @submit.prevent="submitNewPassword">
-      <TextInput
+      <input
+        class="text-input"
         type="password"
-        :modelValue="newPassword"
-        @update:modelValue="newPassword = $event"
+        v-model="newPassword"
         placeholder="New Password"
         autocomplete="new-password"
         required
       />
-      <TextInput
+      <input
+        class="text-input"
         type="password"
-        :modelValue="confirmPassword"
-        @update:modelValue="confirmPassword = $event"
+        v-model="confirmPassword"
         placeholder="Confirm New Password"
         autocomplete="new-password"
         required
@@ -49,14 +49,12 @@
 
 <script>
 import Header from '../components/Header.vue';
-import TextInput from '../components/TextInput.vue';
 import { useUserStore } from '../stores/userStore';
 
 export default {
   name: 'ResetPassword',
   components: {
-    Header,
-    TextInput
+    Header
   },
   data() {
     return {
@@ -162,14 +160,48 @@ export default {
 <style scoped>
 .reset-password {
   text-align: left;
-  margin-top: 50px;
+  margin-top: 30px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+form {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.text-input {
+  height: 40px;
+  width: 275px;
+  font-size: 16px;
+  border-radius: 16px;
 }
 
 button {
-  width: 275px;
-  margin-top: 10px;
+  background-color: #0BDA51;
+  width: 250px;
+  height: 50px;
+  transition-duration: 0.4s;
+  border-radius: 12px;
   padding: 10px;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: green;
+  color: white;  
+}
+
+button:active { 
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
 }
 </style>

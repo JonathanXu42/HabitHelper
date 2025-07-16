@@ -4,17 +4,17 @@
     <form @submit.prevent="changeUserSettings">
       <div class="input-row">
         <label>First Name</label>
-        <TextInput type="firstName" v-model="firstName" placeholder="First Name" autocomplete="given-name" />
+        <input class="text-input" type="firstName" v-model="firstName" placeholder="First Name" autocomplete="given-name" />
       </div>
 
       <div class="input-row">
         <label>Last Name</label>
-        <TextInput type="lastName" v-model="lastName" placeholder="Last Name" autocomplete="family-name" />
+        <input class="text-input" type="lastName" v-model="lastName" placeholder="Last Name" autocomplete="family-name" />
       </div>
 
       <div class="input-row">
         <label>Email</label>
-        <TextInput type="email" v-model="email" autocomplete="email" />
+        <input class="text-input" type="email" v-model="email" autocomplete="email" />
       </div>
       
       <div class="timezone-row">
@@ -39,7 +39,7 @@
 
     <div v-if="awaitingNewEmailVerification" class="verification-block">
       <label for="newEmailCode">Enter verification code to change your email:</label>
-      <TextInput v-model="newEmailVerificationCode" id="newEmailVerificationCode" placeholder="6-digit code" />
+      <input v-model="newEmailVerificationCode" id="newEmailVerificationCode" placeholder="6-digit code" />
       <button class="verify-button" @click.prevent="verifyNewEmailCode">Verify</button>
     </div>
 
@@ -53,7 +53,6 @@
 
 <script>
 import Header from '../components/Header.vue';
-import TextInput from '../components/TextInput.vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useUserStore } from '../stores/userStore';
@@ -63,7 +62,6 @@ export default {
   name: 'Settings',
   components: {
     Header,
-    TextInput,
     Multiselect
   },
   data() {
@@ -275,6 +273,13 @@ export default {
 .input-row label {
   white-space: nowrap;
   width: 100px; /* or whatever fixed width works visually */
+}
+
+.text-input {
+  height: 40px;
+  width: 275px;
+  font-size: 16px;
+  border-radius: 16px;
 }
 
 .timezone-row {

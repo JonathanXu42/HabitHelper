@@ -1,18 +1,27 @@
 <template>
   <Header></Header>
   <div class="landing">
-
-    <h1>Hello World</h1>
-    <div v-if="userStore.isLoggedIn">
-      Welcome, {{ userStore.user.firstName + " " +  userStore.user.lastName }}!
+    <div>
+      <h1> Welcome, {{ userStore.user.firstName + " " +  userStore.user.lastName }}! </h1>
     </div>
   </div>
 
   <button class="add-button" @click="openAddModal">+</button>
 
   <!-- Grid of Habits -->
-  <div class="habit-grid" v-if="habits.length">
-    <HabitCard v-for="habit in habits" :key="habit.id" :habit="habit" @edit="openEditModal" />
+  <div class="habit-grid-wrapper" v-if="habits.length">
+    <draggable
+      v-model="habits"
+      item-key="id"
+      animation="200"
+      ghost-class="drag-ghost"
+      chosen-class="drag-chosen"
+      class="habit-grid"
+    >
+      <template #item="{ element }">
+        <HabitCard :habit="element" @edit="openEditModal" />
+      </template>
+    </draggable>
   </div>
 
   <HabitModal v-if="showModal" :editMode="editMode" :habitData="habitToEdit" @close="closeModal" @created="fetchHabits" @deleted="fetchHabits" />
@@ -23,13 +32,15 @@ import Header from '../components/Header.vue'
 import HabitCard from '../components/HabitCard.vue'
 import HabitModal from '../components/HabitModal.vue'
 import { useUserStore } from '../stores/userStore'
+import draggable from 'vuedraggable'
 
 export default {
   name: 'Landing',
   components: { 
     Header,
     HabitModal,
-    HabitCard
+    HabitCard,
+    draggable
   },
   data() {
     return {
@@ -87,13 +98,25 @@ export default {
   padding: 0 20px;
 }
 
-.habit-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+.habit-grid-wrapper {
   padding: 20px;
   max-width: 900px;
   margin: 0 auto;
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px; /* Increased spacing between habit cards */
+}
+
+/* Visual feedback */
+.drag-ghost {
+  opacity: 0.5;
+}
+.drag-chosen {
+  transform: rotate(1deg);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .add-button {

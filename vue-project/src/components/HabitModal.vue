@@ -4,36 +4,44 @@
       <div class="modal-content">
         <h2>{{ editMode ? 'Edit Habit' : 'Add a New Habit' }}</h2>
         <form @submit.prevent="submitHabit">
-          <div>
-            <label>Name:</label>
-            <input v-model="form.name" required />
+          <div class="form-section">
+            <input
+              class="text-input"
+              v-model="form.name"
+              placeholder="Habit Name"
+              required
+              autofocus
+            />
           </div>
 
-          <div>
-            <label>Notes:</label>
-            <textarea v-model="form.notes" />
+          <div class="form-section">
+            <textarea
+              v-model="form.notes"
+              placeholder="Why are you building this habit? (Optional)"
+            />
           </div>
 
-          <div>
+          <div class="form-section">
             <label>Days of the Week:</label>
             <div class="days">
               <label v-for="(day, index) in days" :key="index">
                 <input type="checkbox" :value="index" v-model="form.daysOfWeek" />
-                {{ day }}
+                <span>{{ day }}</span>
               </label>
             </div>
           </div>
 
-          <!-- Email Reminder Checkbox -->
-          <div>
+          <div class="form-section">
             <label>
               <input type="checkbox" v-model="form.emailReminderEnabled" />
               Enable Email Reminders
             </label>
           </div>
 
-          <!-- Reminder Times by Day -->
-          <div v-if="form.emailReminderEnabled">
+          <div
+            v-if="form.emailReminderEnabled && form.daysOfWeek.length"
+            class="form-section"
+          >
             <div v-for="dayIndex in form.daysOfWeek" :key="dayIndex">
               <h4>{{ days[dayIndex] }}</h4>
               <div
@@ -41,9 +49,21 @@
                 :key="i"
                 class="time-entry"
               >
-                <input type="number" v-model.number="time.hour" min="1" max="12" style="width: 60px;" @input="clampHour(dayIndex, i)" />
+                <input
+                  type="number"
+                  v-model.number="time.hour"
+                  min="0"
+                  max="12"
+                  @input="clampHour(dayIndex, i)"
+                />
                 :
-                <input type="number" v-model.number="time.minute" min="0" max="59" style="width: 60px;" @input="clampMinute(dayIndex, i)"/>
+                <input
+                  type="number"
+                  v-model.number="time.minute"
+                  min="0"
+                  max="59"
+                  @input="clampMinute(dayIndex, i)"
+                />
                 <select v-model="time.period">
                   <option>AM</option>
                   <option>PM</option>
@@ -54,16 +74,26 @@
             </div>
           </div>
 
-          <button type="submit">{{ editMode ? 'Save Changes' : 'Add Habit' }}</button>
-          <button type="button" @click="$emit('close')">Cancel</button>
-          <button
-            v-if="editMode"
-            type="button"
-            @click="confirmDelete"
-            style="margin-left: 10px; background-color: crimson; color: white;"
-          >
-            Delete
-          </button>
+          <div class="action-buttons">
+            <div class="left-buttons">
+              <button type="submit">
+                {{ editMode ? 'Save Changes' : 'Add Habit' }}
+              </button>
+            </div>
+            <div class="right-buttons">
+              <button type="button" class="cancel" @click="$emit('close')">
+                Cancel
+              </button>
+              <button
+                v-if="editMode"
+                type="button"
+                class="delete"
+                @click="confirmDelete"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -80,7 +110,7 @@ export default {
         notes: '',
         daysOfWeek: [],
         emailReminderEnabled: false,
-        reminderTimesByDay: []
+        reminderTimesByDay: {}
       },
       days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     };
@@ -112,13 +142,13 @@ export default {
           this.form.daysOfWeek = [...daysOfWeek];
           this.form.emailReminderEnabled = emailReminderSettings?.enabled || false;
 
-          // ✅ Reconstruct reminderTimesByDay using numeric keys
           this.form.reminderTimesByDay = {};
           if (emailReminderSettings?.timesByDay) {
-            this.form.reminderTimesByDay = {};
-            for (const [day, timeStrings] of Object.entries(emailReminderSettings.timesByDay)) {
-                const dayNum = parseInt(day, 10);
-                this.form.reminderTimesByDay[dayNum] = timeStrings.map(str => {
+            for (const [day, timeStrings] of Object.entries(
+              emailReminderSettings.timesByDay
+            )) {
+              const dayNum = parseInt(day, 10);
+              this.form.reminderTimesByDay[dayNum] = timeStrings.map(str => {
                 const [hh, mm] = str.split(':').map(Number);
                 const period = hh >= 12 ? 'PM' : 'AM';
                 const hour12 = hh % 12 === 0 ? 12 : hh % 12;
@@ -138,8 +168,6 @@ export default {
           this.form.reminderTimesByDay[day] = [];
         }
       }
-
-      // Sort the daysOfWeek array
       this.form.daysOfWeek.sort((a, b) => a - b);
     }
   },
@@ -174,7 +202,7 @@ export default {
       this.form.reminderTimesByDay[day].sort((a, b) => {
         const timeA = this.formatTime(a);
         const timeB = this.formatTime(b);
-        return timeA.localeCompare(timeB); // Lexicographic sort like "08:00" < "14:00"
+        return timeA.localeCompare(timeB);
       });
     },
     removeTime(day, index) {
@@ -218,9 +246,8 @@ export default {
         if (!response.ok) {
           if (method === 'PATCH') {
             throw new Error('Failed to update habit');
-          }
-          else {
-            throw new Error ('Failed to create')
+          } else {
+            throw new Error('Failed to create habit');
           }
         }
 
@@ -231,7 +258,8 @@ export default {
       }
     },
     async confirmDelete() {
-      if (!confirm('Are you sure you want to delete this habit? This cannot be undone.')) return;
+      if (!confirm('Are you sure you want to delete this habit? This cannot be undone.'))
+        return;
 
       try {
         const response = await fetch(`http://localhost:3000/api/habits/${this.habitData.id}`, {
@@ -258,7 +286,7 @@ export default {
     },
     clampHour(day, i) {
       const time = this.form.reminderTimesByDay[day][i];
-      if (time.hour < 1) time.hour = 1;
+      if (time.hour < 0) time.hour = 0;
       if (time.hour > 12) time.hour = 12;
     },
     clampMinute(day, i) {
@@ -273,41 +301,169 @@ export default {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(12, 11, 11, 0.5);
-  display: flex; justify-content: center; align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
 .modal {
-  background: rgb(207, 80, 80);
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
-  max-height: 90vh;  
+  background: #1f1f1f;
+  color: #f0f0f0;
+  padding: 24px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  animation: fadeInScale 0.3s ease forwards;
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+input[type='text'],
+input[type='number'],
+textarea,
+select {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background-color: #2c2c2c;
+  color: #f0f0f0;
+  font-size: 14px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
 }
 
 .days {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.days label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #333;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.days input[type='checkbox'] {
+  display: none;
+}
+
+.days input[type='checkbox']:checked + span {
+  background-color: #4caf50;
+  color: white;
 }
 
 .time-entry {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-.modal-content {
-  padding: 20px;
-  overflow-y: auto;      /* Make modal content scrollable */
-  flex-grow: 1;          /* So the scrollable part fills modal */
+.time-entry input[type='number'] {
+  width: 50px;
+  text-align: center;
+}
+
+.time-entry button {
+  background: none;
+  color: #e74c3c;
+  font-size: 18px;
+  padding: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+button {
+  padding: 8px 16px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button[type='submit'] {
+  background-color: #4caf50;
+  color: white;
+}
+
+button[type='submit']:hover {
+  background-color: #43a047;
+}
+
+button.cancel {
+  background-color: #888;
+  color: white;
+}
+
+button.cancel:hover {
+  background-color: #777;
+}
+
+button.delete {
+  background-color: #e74c3c;
+  color: white;
+}
+
+button.delete:hover {
+  background-color: #c0392b;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.left-buttons {
+  flex-shrink: 0;
+}
+
+.right-buttons {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

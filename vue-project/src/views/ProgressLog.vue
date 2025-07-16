@@ -286,7 +286,14 @@
       their new email address and enter that in. This is to prevent users from accidentally switching their accounts over to the wrong email
       then being locked out. I'm also making users go through this same process if they want to delete their accounts, since this is far more
       secure than having the user simply retype their email to confirm account deletion.
-    </ProgressLogEntry>    
+    </ProgressLogEntry>
+    
+    <ProgressLogEntry date="July 16th, 2025">
+      Today I worked on the frontend for the reset password page, landing page, habit modal, and habit log modal. I got rid of the TextInput
+      component and switched to using native HTML input elements because the TextInput styles were being applied universally to all TextInputs,
+      no matter what page they were on, whereas using native inputs offers me more customizability and specificity. The TextInput.vue file
+      didn't contain any reusable logic, and it was causing more hassle than it was saving.
+    </ProgressLogEntry>
   </div>
 </template>
 

@@ -1,12 +1,12 @@
 <template>
     <div class="create-account">
         <form @submit.prevent="handleInitialSubmit">
-            <TextInput type="firstName" v-model="signupFirstName" placeholder="First Name" autocomplete="given-name" />
-            <TextInput type="lastName" v-model="signupLastName" placeholder="Last Name" autocomplete="family-name" />
-            <TextInput type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
-            <TextInput type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
-            <TextInput type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
-            
+            <input type="firstName" v-model="signupFirstName" placeholder="First Name" autocomplete="given-name" />
+            <input type="lastName" v-model="signupLastName" placeholder="Last Name" autocomplete="family-name" />
+            <input type="email" v-model="signupEmail" placeholder="Email" autocomplete="email" required />
+            <input type="password" v-model="signupPassword" placeholder="Password" autocomplete="new-password" required />
+            <input type="password" v-model="signupConfirm" placeholder="Confirm password" autocomplete="new-password" required />
+
             <label for="timezone">Timezone</label>
             <multiselect
                 id="timezone"
@@ -22,10 +22,9 @@
         </form>
 
         <form v-if="codeSent" @submit.prevent="verifyCode">
-            <TextInput
+            <input
                 type="text"
-                :modelValue="enteredCode"
-                @update:modelValue="enteredCode = $event"
+                v-model="enteredCode"
                 placeholder="Enter 6-digit code"
                 required
             />
@@ -35,7 +34,6 @@
 </template>
 
 <script>
-import TextInput from '../components/TextInput.vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useTimezoneStore } from '../stores/timezoneStore';
@@ -43,7 +41,6 @@ import { useTimezoneStore } from '../stores/timezoneStore';
 export default {
     name: 'Create-Account',
         components: {
-        TextInput,
         Multiselect
     },
     data() {

@@ -22,7 +22,7 @@ router.get('/:habitId/logs', ensureAuthenticated, async (req, res) => {
 
 router.post('/:habitId/logs', ensureAuthenticated, async (req, res) => {
     const { habitId } = req.params;
-    const { completed, progress, notes } = req.body;
+    const { completed, notes } = req.body;
 
     try {
         const habit = await prisma.habit.findUnique({
@@ -60,7 +60,6 @@ router.post('/:habitId/logs', ensureAuthenticated, async (req, res) => {
                 habitId,
                 userId,
                 completed,
-                progress,
                 notes
             }
         });
@@ -86,7 +85,7 @@ router.post('/:habitId/logs', ensureAuthenticated, async (req, res) => {
 
 router.patch('/:habitId/logs/:logId', ensureAuthenticated, async (req, res) => {
   const { habitId, logId } = req.params;
-  const { completed, progress, notes } = req.body;
+  const { completed, notes } = req.body;
 
   try {
     // 1. Confirm the habit exists and belongs to this user
@@ -112,7 +111,6 @@ router.patch('/:habitId/logs/:logId', ensureAuthenticated, async (req, res) => {
       where: { id: logId },
       data: {
         completed,
-        progress,
         notes
       }
     });
