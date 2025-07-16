@@ -57,11 +57,13 @@ export default {
 
 <style scoped>
 .progress-log-entry {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-  background-color: #0a0a0a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background-color: #121212;
+  box-shadow: 0 4px 14px rgba(0, 128, 0, 0.3);
+  color: #ddd;
+  user-select: none;
 }
 
 .entry-header {
@@ -69,18 +71,25 @@ export default {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 24px;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #4caf50; /* green accent */
+  text-shadow: 0 0 6px #4caf50aa;
 }
 
 .entry-date {
-  margin-right: 12px;
+  margin-right: 16px;
 }
 
 .toggle-icon {
   display: inline-block;
-  transition: transform 0.4s ease;
-  font-size: 1rem;
+  transition: transform 0.35s ease, color 0.3s ease;
+  font-size: 1.2rem;
+  color: #4caf50;
+}
+
+.toggle-icon:hover {
+  color: #81c784;
 }
 
 .toggle-icon.rotated {
@@ -88,8 +97,12 @@ export default {
 }
 
 .entry-body {
-  font-size: 16px;
-  margin-top: 10px;
-  line-height: 1.5;
+  font-size: 1rem;
+  margin-top: 12px;
+  line-height: 1.6;
+  color: #b0b0b0;
+  padding-left: 8px;
+  border-left: 3px solid #4caf50;
+  user-select: text;
 }
 </style>

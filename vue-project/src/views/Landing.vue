@@ -124,7 +124,7 @@ export default {
   bottom: 20px;
   right: 20px;
   font-size: 24px;
-  padding: 12px 18px;
+  padding: 14px 20px;
   border-radius: 50%;
   background-color: #4CAF50;
   color: white;

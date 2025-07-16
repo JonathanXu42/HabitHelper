@@ -44,6 +44,12 @@
       />
       <button type="submit">Set New Password</button>
     </form>
+    
+    <p>
+      <a class="login-page-link" @click.prevent="$router.push('/')">Remembered your password? Log in here</a>
+    </p>
+    <br>
+    <a class="create-account-link" @click.prevent="$router.push('/create-account')">Don't have an account? Create one here</a>
   </div>
 </template>
 
@@ -203,5 +209,12 @@ button:active {
   background-color: #3e8e41;
   box-shadow: 0 5px #666;
   transform: translateY(4px);
+}
+
+.login-page-link {
+  color: rgb(65, 65, 217);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 16px;
 }
 </style>

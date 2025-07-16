@@ -91,31 +91,31 @@ export async function rescheduleRemindersForTimezoneChange(userId, newTimezone) 
   }
 }
 
-cron.schedule('* * * * *', async () => {
-  const now = DateTime.utc().toJSDate();
-  const dueReminders = await prisma.scheduledReminder.findMany({
-    where: {
-      sendAt: {
-        lte: now
-      }
-    },
-    include: {
-      habit: true,
-      user: true
-    }
-  });
+// cron.schedule('* * * * *', async () => {
+//   const now = DateTime.utc().toJSDate();
+//   const dueReminders = await prisma.scheduledReminder.findMany({
+//     where: {
+//       sendAt: {
+//         lte: now
+//       }
+//     },
+//     include: {
+//       habit: true,
+//       user: true
+//     }
+//   });
 
-  console.log("checking for scheduled reminders at local time: ", now)
-  console.log("due reminders: ", dueReminders)
+//   console.log("checking for scheduled reminders at local time: ", now)
+//   console.log("due reminders: ", dueReminders)
 
-  for (const reminder of dueReminders) {
-    try {
-      await emailReminder(reminder.user.email, reminder.habit.name, reminder.habit.currentStreak);
-      await prisma.scheduledReminder.delete({ where: { id: reminder.id } });
+//   for (const reminder of dueReminders) {
+//     try {
+//       await emailReminder(reminder.user.email, reminder.habit.name, reminder.habit.currentStreak);
+//       await prisma.scheduledReminder.delete({ where: { id: reminder.id } });
 
-      await scheduleRemindersForHabit(reminder.habit, reminder.user);
-    } catch (err) {
-      console.error(`Failed to send or reschedule reminder for ${user.email}`, err);
-    }
-  } 
-});
+//       await scheduleRemindersForHabit(reminder.habit, reminder.user);
+//     } catch (err) {
+//       console.error(`Failed to send or reschedule reminder for ${user.email}`, err);
+//     }
+//   } 
+// });

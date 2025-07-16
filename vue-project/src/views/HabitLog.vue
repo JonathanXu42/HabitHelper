@@ -109,16 +109,47 @@ export default {
 </script>
 
 <style>
+/* Header title */
+h1.text-2xl.font-bold.mb-6 {
+  color: #4caf50;
+  font-weight: 700;
+  font-size: 2.25rem;
+  text-align: center;
+  text-shadow: 0 0 8px #4caf50aa;
+  user-select: none;
+}
+
+/* No logs message */
+.text-gray-500.text-center {
+  color: #7a7a7a;
+  font-style: italic;
+  margin-top: 3rem;
+  user-select: none;
+}
+
+/* Add button */
 .add-button {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  font-size: 24px;
-  padding: 12px 18px;
+  font-size: 28px;
+  padding: 14px 20px;
   border-radius: 50%;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 12px #4caf50cc;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  user-select: none;
+}
+
+.add-button:hover {
+  background-color: #81c784;
+  transform: scale(1.1);
+}
+
+.add-button:active {
+  transform: scale(0.95);
 }
 </style>

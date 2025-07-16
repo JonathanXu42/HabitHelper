@@ -39,13 +39,13 @@
 
     <div v-if="awaitingNewEmailVerification" class="verification-block">
       <label for="newEmailCode">Enter verification code to change your email:</label>
-      <input v-model="newEmailVerificationCode" id="newEmailVerificationCode" placeholder="6-digit code" />
+      <input class="text-input" v-model="newEmailVerificationCode" id="newEmailVerificationCode" placeholder="6-digit code" />
       <button class="verify-button" @click.prevent="verifyNewEmailCode">Verify</button>
     </div>
 
     <div v-if="awaitingDeleteVerification" class="verification-block">
       <label for="deleteCode">Enter verification code to delete your account:</label>
-      <input v-model="deleteVerificationCode" type="text" id="deleteCode" placeholder="6-digit code" />
+      <input class="text-input" v-model="deleteVerificationCode" type="text" id="deleteCode" placeholder="6-digit code" />
       <button class="verify-button" @click.prevent="verifyDeleteCode">Verify</button>
     </div>
   </div>
