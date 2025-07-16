@@ -1,28 +1,39 @@
 <template>
-  <div class="habit-log-card">
+  <div class="habit-log-card" @click="toggleExpanded">
     <div class="header-row">
       <h3 class="date-time">
         {{ formatDateTime(log.date) }}
       </h3>
-      <span
-        class="status-badge"
-        :class="log.completed ? 'completed' : 'missed'"
-      >
-        {{ log.completed ? 'Completed' : 'Missed' }}
-      </span>
+      <div class="badge-row">
+        <span
+          class="status-badge"
+          :class="log.completed ? 'completed' : 'missed'"
+        >
+          {{ log.completed ? 'Completed' : 'Missed' }}
+        </span>
+        <span class="toggle-icon" :class="{ rotated: expanded }">▶</span>
+      </div>
     </div>
 
-    <p v-if="log.progress !== null" class="progress">
-      Progress: {{ log.progress }}
-    </p>
-    <p v-if="log.notes" class="notes">
-      {{ log.notes }}
-    </p>
+    <transition
+      @before-enter="beforeEnter"
+      @enter="enter"
+      @leave="leave"
+    >
+      <div v-show="expanded" class="entry-body">
+        <p v-if="log.progress !== null" class="progress">
+          Progress: {{ log.progress }}
+        </p>
+        <p v-if="log.notes" class="notes">
+          {{ log.notes }}
+        </p>
 
-    <div class="actions">
-      <button class="edit-btn" @click="$emit('edit', log)">✏️ Edit Log</button>
-      <button class="delete-btn" @click="confirmDelete">Delete</button>
-    </div>
+        <div class="actions" @click.stop>
+          <button class="edit-btn" @click="$emit('edit', log)">✏️ Edit Log</button>
+          <button class="delete-btn" @click="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -35,10 +46,17 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      expanded: true
+    };
+  },
   methods: {
+    toggleExpanded() {
+      this.expanded = !this.expanded;
+    },
     formatDateTime(dateStr) {
       const date = new Date(dateStr);
-      // Format date + time localized to user
       return date.toLocaleString(undefined, {
         weekday: 'short',
         year: 'numeric',
@@ -51,20 +69,33 @@ export default {
       });
     },
     async confirmDelete() {
-      if (!confirm('Are you sure you want to delete this habit log? This cannot be undone.')) return;
-
+      if (!confirm('Are you sure you want to delete this habit log?')) return;
       try {
         const response = await fetch(`/api/habit-logs/${this.log.habitId}/logs/${this.log.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
-
         if (!response.ok) throw new Error('Failed to delete habit log');
-
         this.$emit('deleted', this.log.id);
       } catch (err) {
         alert(err.message);
       }
+    },
+    beforeEnter(el) {
+      el.style.height = '0';
+      el.style.opacity = '0';
+    },
+    enter(el) {
+      el.style.transition = 'all 0.3s ease';
+      el.style.height = el.scrollHeight + 'px';
+      el.style.opacity = '1';
+    },
+    leave(el) {
+      el.style.transition = 'all 0.3s ease';
+      el.style.height = el.scrollHeight + 'px';
+      el.offsetHeight;
+      el.style.height = '0';
+      el.style.opacity = '0';
     }
   }
 };
@@ -79,6 +110,8 @@ export default {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   margin-bottom: 1rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 .habit-log-card:hover {
@@ -90,7 +123,12 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.8rem;
+}
+
+.badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .date-time {
@@ -104,7 +142,6 @@ export default {
   font-weight: 600;
   font-size: 0.85rem;
   border-radius: 9999px;
-  user-select: none;
 }
 
 .status-badge.completed {
@@ -117,6 +154,26 @@ export default {
   background-color: #e57373;
   color: #450000;
   box-shadow: 0 0 6px #e57373aa;
+}
+
+.toggle-icon {
+  font-size: 1.1rem;
+  color: #4caf50;
+  transition: transform 0.35s ease, color 0.2s ease;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(90deg);
+}
+
+.entry-body {
+  font-size: 1rem;
+  margin-top: 12px;
+  line-height: 1.6;
+  color: #b0b0b0;
+  padding-left: 8px;
+  border-left: 3px solid #4caf50;
+  user-select: text;
 }
 
 .progress {
@@ -135,6 +192,7 @@ export default {
 .actions {
   display: flex;
   gap: 0.8rem;
+  margin-top: 0.5rem;
 }
 
 .actions button {

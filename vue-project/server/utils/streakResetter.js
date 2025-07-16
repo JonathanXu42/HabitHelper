@@ -16,12 +16,12 @@ cron.schedule('0 * * * *', async () => {
       }
     });
 
-    console.log("Users found: ", users)
+    // console.log("Users found: ", users)
 
     for (const user of users) {
       const nowLocal = DateTime.utc().setZone(user.timezone);
 
-      console.log("localTime in ", user.timezone, " : ", nowLocal)
+      // console.log("localTime in ", user.timezone, " : ", nowLocal)
 
       // Only run this for users whose current local time is between 00:00 and 00:59
       if (nowLocal.hour !== 0) continue;
@@ -29,8 +29,8 @@ cron.schedule('0 * * * *', async () => {
       const startOfYesterdayUTC = nowLocal.minus({ days: 1 }).startOf('day').toUTC().toJSDate();
       const endOfYesterdayUTC = nowLocal.minus({ days: 1 }).endOf('day').toUTC().toJSDate();
 
-      console.log("startOfYesterdayUTC: ", startOfYesterdayUTC)
-      console.log("endOfYesterdayUTC: ", endOfYesterdayUTC)
+      // console.log("startOfYesterdayUTC: ", startOfYesterdayUTC)
+      // console.log("endOfYesterdayUTC: ", endOfYesterdayUTC)
 
       const habits = await prisma.habit.findMany({
         where: { userId: user.id }
@@ -56,7 +56,7 @@ cron.schedule('0 * * * *', async () => {
         });
 
         if (logs.length === 0) {
-          console.log("found ", logs.length, " logs for ", habit.name)
+          // console.log("found ", logs.length, " logs for ", habit.name)
           await prisma.habit.update({
             where: { id: habit.id },
             data: { currentStreak: 0 }
@@ -71,7 +71,7 @@ cron.schedule('0 * * * *', async () => {
       }
     }
 
-    console.log(`[${new Date().toISOString()}] Streak check completed.`);
+    // console.log(`[${new Date().toISOString()}] Streak check completed.`);
   } catch (err) {
     console.error('Streak reset job failed:', err);
   }
