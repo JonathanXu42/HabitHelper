@@ -32,7 +32,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     });
 
     if (timezone !== oldUser.timezone) {
-      await rescheduleRemindersForTimezoneChange(userId, timezone);
+      await rescheduleRemindersForTimezoneChange(userId, oldUser.timezone, timezone);
     }
 
     res.status(200).json({ message: 'User settings updated', user: updatedUser });

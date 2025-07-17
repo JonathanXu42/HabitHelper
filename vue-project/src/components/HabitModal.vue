@@ -388,7 +388,7 @@ textarea {
 }
 
 .time-entry input[type='number'] {
-  width: 50px;
+  width: 70px;
   text-align: center;
 }
 

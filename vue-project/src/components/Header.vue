@@ -2,7 +2,7 @@
   <header class="main-header">
     <nav class="nav-container">
       <a class="logo-wrapper" href='/landing'>
-        <img class="logo-corner" src="../../habithelper_favicon.png"/>
+        <img class="logo-corner" src="../../public/habithelper_favicon.png"/>
       </a>
 
       <a

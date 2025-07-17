@@ -72,4 +72,5 @@ model ScheduledReminder {
   user       User     @relation(fields: [userId], references: [id])
 
   @@index([sendAt])
+  @@unique([habitId, userId, sendAt])
 }

@@ -2,9 +2,9 @@
   <div class="login-container">
     <div class="app-brand">
       <h1 class="app-title">
-        <img src="../../habithelper_favicon.png" alt="H" class="logo-letter"/>
+        <img src="../../public/habithelper_favicon.png" alt="H" class="logo-letter"/>
         ABIT
-        <img src="../../habithelper_favicon.png" alt="H" class="logo-letter"/>
+        <img src="../../public/habithelper_favicon.png" alt="H" class="logo-letter"/>
         ELPER
       </h1>
       <p class="app-subtitle">Keeping you on track with your goals, one day at a time</p>

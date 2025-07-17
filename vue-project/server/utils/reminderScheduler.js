@@ -7,8 +7,6 @@ export async function scheduleRemindersForHabit(habit, user) {
   const settings = habit.emailReminderSettings; // assumed to be { "5": "08:30", ... }
   const timezone = user.timezone;
 
-  // console.log("settings is ", settings)
-
   if (!settings.enabled || !settings.timesByDay) {
     return;
   }
@@ -29,10 +27,16 @@ export async function scheduleRemindersForHabit(habit, user) {
         next = next.plus({ days: 1 });
       }
 
-      // console.log("scheduling email reminder at:", next.toUTC().toISO(), "for habit:", habit.name, "belonging to user:", user.email);
-
-      await prisma.scheduledReminder.create({
-        data: {
+      await prisma.scheduledReminder.upsert({
+        where: {
+          habitId_userId_sendAt: {
+            habitId: habit.id,
+            userId: user.id,
+            sendAt: next.toUTC().toJSDate()
+          }
+        },
+        update: {}, // Leave existing record as is (you could update here if needed)
+        create: {
           habitId: habit.id,
           userId: user.id,
           sendAt: next.toUTC().toJSDate()
@@ -47,46 +51,42 @@ export async function clearRemindersForHabit(habitId) {
   await prisma.scheduledReminder.deleteMany({ where: { habitId } });
 }
 
-export async function rescheduleRemindersForTimezoneChange(userId, newTimezone) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      habits: true
-    }
+export async function rescheduleRemindersForTimezoneChange(userId, oldTimezone, newTimezone) {
+  console.log("oldtimezone: ", oldTimezone)
+  console.log("newtimezone: ", newTimezone)
+
+  const reminders = await prisma.scheduledReminder.findMany({
+    where: { userId }
   });
 
-  for (const habit of user.habits) {
-    // console.log("rescheduling reminders for: ", habit.name)
-    const settings = habit.emailReminderSettings;
-    if (!settings?.enabled || !settings.timesByDay) continue;
+  for (const reminder of reminders) {
+    console.log("reminder: ", reminder)
+    // Step 1: Interpret sendAt as time in old timezone
+    const oldLocal = DateTime.fromJSDate(reminder.sendAt, { zone: 'utc' }).setZone(oldTimezone);
 
-    const timesByDay = settings.timesByDay;
+    // Step 2: Extract local date and time components
+    const { year, month, day, hour, minute, second, millisecond } = oldLocal;
 
-    for (const [dayString, times] of Object.entries(timesByDay)) {
-      const day = parseInt(dayString);
+    // Step 3: Reconstruct same local wall time in the new timezone
+    const newLocal = DateTime.fromObject(
+      { year, month, day, hour, minute, second, millisecond },
+      { zone: newTimezone }
+    );
 
-      for (const time of times) {
-        const [hour, minute] = time.split(':').map(Number);
-        const now = DateTime.now().setZone(newTimezone);
+    // Step 4: Convert back to UTC
+    const newSendAt = newLocal.toUTC().toJSDate();
 
-        let next = now.set({ hour, minute, second: 0, millisecond: 0 });
-        while (next.weekday % 7 !== day % 7 || next <= now) {
-          next = next.plus({ days: 1 });
-        }
+    console.log("oldLocal: ", oldLocal)
+    console.log("oldSendAt: ", reminder.sendAt)
+    console.log("newLocal: ", newLocal)
+    console.log("newSendAt: ", newSendAt)
 
-        // Find and update the existing reminder that matches this habitId/userId/day/time
-        // Since we don't track the original day/time per reminder, we have to update all
-        // future reminders for this habit/user to new time. This is a limitation unless you store extra metadata.
-        await prisma.scheduledReminder.updateMany({
-          where: {
-            habitId: habit.id,
-            userId: userId
-          },
-          data: {
-            sendAt: next.toUTC().toJSDate()
-          }
-        });
-      }
+    // Optional: Avoid unnecessary DB writes
+    if (+newSendAt !== +reminder.sendAt) {
+      await prisma.scheduledReminder.update({
+        where: { id: reminder.id },
+        data: { sendAt: newSendAt }
+      });
     }
   }
 }
@@ -104,9 +104,6 @@ cron.schedule('* * * * *', async () => {
       user: true
     }
   });
-
-  // console.log("checking for scheduled reminders at local time: ", now)
-  // console.log("due reminders: ", dueReminders)
 
   for (const reminder of dueReminders) {
     try {
