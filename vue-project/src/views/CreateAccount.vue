@@ -77,9 +77,10 @@ export default {
       }
 
       try {
-        const checkRes = await fetch('http://localhost:3000/auth/check-existing-account', {
+        const checkRes = await fetch('/auth/check-existing-account', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email: this.signupEmail })
         });
 
@@ -96,6 +97,7 @@ export default {
         const response = await fetch('/api/send-verification-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email: this.signupEmail })
         });
 
@@ -140,7 +142,7 @@ export default {
 
     async createAccount() {
       try {
-        const response = await fetch('http://localhost:3000/auth/signup', {
+        const response = await fetch('/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

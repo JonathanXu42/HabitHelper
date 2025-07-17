@@ -62,7 +62,9 @@ export default {
     const habitId = this.$route.params.habitId;
 
     // First fetch the habit
-    const habitRes = await fetch(`/api/habits/${habitId}`);
+    const habitRes = await fetch(`/api/habits/${habitId}`, {
+      credentials: 'include'
+    });
     if (!habitRes.ok) {
       console.error('Failed to fetch habit:', await habitRes.text());
       this.$router.push('/habit-not-found');  //I don't have a custom habit-not-found page, so this just defaults to
@@ -71,7 +73,9 @@ export default {
     this.habit = await habitRes.json();
 
     // Then fetch its logs from the correct route
-    const logsRes = await fetch(`/api/habit-logs/${habitId}/logs`);
+    const logsRes = await fetch(`/api/habit-logs/${habitId}/logs`, {
+      credentials: 'include'
+    });
     if (!logsRes.ok) {
       console.error('Failed to fetch habit logs:', await logsRes.text());
       return;

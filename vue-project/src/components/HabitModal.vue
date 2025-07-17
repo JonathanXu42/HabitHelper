@@ -231,15 +231,15 @@ export default {
 
       try {
         const url = this.editMode
-          ? `http://localhost:3000/api/habits/${this.habitData.id}`
-          : 'http://localhost:3000/api/habits';
+          ? `/api/habits/${this.habitData.id}`
+          : '/api/habits';
 
         const method = this.editMode ? 'PATCH' : 'POST';
 
         const response = await fetch(url, {
           method,
-          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(payload)
         });
 
@@ -262,7 +262,7 @@ export default {
         return;
 
       try {
-        const response = await fetch(`http://localhost:3000/api/habits/${this.habitData.id}`, {
+        const response = await fetch(`/api/habits/${this.habitData.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });

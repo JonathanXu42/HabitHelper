@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     async fetchUser() {
       try {
-        const res = await fetch('http://localhost:3000/api/me', {
+        const res = await fetch('/api/me', {
           credentials: 'include'
         });
         if (!res.ok) throw new Error('Not logged in');

@@ -2,7 +2,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 
 export default session({
-  secret: 'your-secret',
+  secret: process.env.SESSION_SECRET || 'your-secret',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
@@ -10,6 +10,9 @@ export default session({
     collectionName: 'sessions'
   }),
   cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
 });

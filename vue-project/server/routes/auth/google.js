@@ -8,7 +8,7 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
-    res.redirect(`http://localhost:5173/landing?email=${encodeURIComponent(req.user.email)}`);
+    res.redirect(`/landing?email=${encodeURIComponent(req.user.email)}`);
   }
 );
 

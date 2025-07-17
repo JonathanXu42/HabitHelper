@@ -32,3 +32,5 @@ coverage
 
 .env
 get_refresh_token.js
+localhost.pem
+localhost-key.pem

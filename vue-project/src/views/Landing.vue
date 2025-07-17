@@ -58,7 +58,7 @@ export default {
   methods: {
     async fetchHabits() {
       try {
-        const response = await fetch('http://localhost:3000/api/habits', {
+        const response = await fetch('/api/habits', {
           credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to fetch habits');

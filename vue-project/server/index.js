@@ -1,8 +1,13 @@
-// server/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import passport from 'passport';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import https from 'https';
+import fs from 'fs';
 
 import emailRoutes from './routes/email.js';
 import resetPasswordRoutes from './routes/reset-password.js';
@@ -18,25 +23,57 @@ import './passport.js';
 import './utils/reminderScheduler.js';
 import './utils/streakResetter.js';
 
+// Setup path helpers (for __dirname in ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const NODE_PORT = process.env.NODE_PORT;
+const NODE_PORT = process.env.NODE_PORT || 3000;
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}))
-
+// Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      imgSrc: ["'self'", "data:", "https://www.gstatic.com"],
+      connectSrc: ["'self'", "https:"],
+      fontSrc: ["'self'", "https:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    }
+  }
+}));
+app.use(compression());
 app.use(express.json());
+
+// CORS
+const allowedOrigins = [
+  'https://localhost:3000',                  // Local dev
+  process.env.FRONTEND_URL                 // Production frontend (e.g., https://habithelper.app)
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// Sessions and auth
+app.set('trust poxy', 1);
 app.use(sessionMiddleware);
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
-
-// Routes
+// API Routes
 app.use('/api', emailRoutes);
 app.use('/reset-password', resetPasswordRoutes);
 app.use('/auth', authRoutes);
@@ -45,12 +82,33 @@ app.use('/user-settings', userSettingsRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/habit-logs', habitLogRoutes);
 
-// 404 for unknown API routes
+// 404 handler for unmatched API routes
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// Start server
-app.listen(NODE_PORT, () => {
-  console.log(`Server is running on http://localhost:${NODE_PORT}`);
+// === Serve Frontend ===
+// Serve static frontend files from dist/
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
+
+// Match only non-API, non-static routes
+app.get(/^\/(?!api|auth|user-settings|static).*$/, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
+
+// Start HTTPS server in development
+if (process.env.NODE_ENV !== 'production') {
+  const httpsOptions = {
+    key: fs.readFileSync('./localhost-key.pem'),
+    cert: fs.readFileSync('./localhost.pem'),
+  };
+
+  https.createServer(httpsOptions, app).listen(NODE_PORT, () => {
+    console.log(`🚀 Dev server running at https://localhost:${NODE_PORT}`);
+  });
+} else {
+  app.listen(NODE_PORT, () => {
+    console.log(`🚀 Prod server running at https://localhost:${NODE_PORT}`);
+  });
+}

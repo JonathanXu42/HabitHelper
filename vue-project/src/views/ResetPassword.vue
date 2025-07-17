@@ -88,6 +88,7 @@ export default {
         const response = await fetch('/api/send-verification-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email: this.email })
         });
 
@@ -138,9 +139,10 @@ export default {
       }
 
       try {
-        const response = await fetch('http://localhost:3000/reset-password', {
+        const response = await fetch('/reset-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             email: this.email,
             newPassword: this.newPassword

@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     logout() {
-      fetch('http://localhost:3000/auth/logout', {
+      fetch('/auth/logout', {
         method: 'GET',
         credentials: 'include' // ensures session cookie is sent
       })

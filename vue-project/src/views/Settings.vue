@@ -123,7 +123,7 @@ export default {
 
       // Continue with actual update
       try {
-        const response = await fetch('http://localhost:3000/user-settings', {
+        const response = await fetch('/user-settings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -207,7 +207,7 @@ export default {
 
       // Step 2: actually delete account
       try {
-        const response = await fetch('http://localhost:3000/user-settings/delete-account', {
+        const response = await fetch('/user-settings/delete-account', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
