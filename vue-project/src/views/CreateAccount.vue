@@ -39,6 +39,7 @@
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useTimezoneStore } from '../stores/timezoneStore';
+import { fetchWithCsrf } from '../stores/csrfStore';
 
 export default {
   name: 'Create-Account',
@@ -77,10 +78,8 @@ export default {
       }
 
       try {
-        const checkRes = await fetch('/auth/check-existing-account', {
+        const checkRes = await fetchWithCsrf('/auth/check-existing-account', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({ email: this.signupEmail })
         });
 
@@ -94,10 +93,8 @@ export default {
       }
 
       try {
-        const response = await fetch('/api/send-verification-code', {
+        const response = await fetchWithCsrf('/api/send-verification-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({ email: this.signupEmail })
         });
 
@@ -115,10 +112,8 @@ export default {
 
     async verifyCode() {
       try {
-        const response = await fetch('/api/verify-code', {
+        const response = await fetchWithCsrf('/api/verify-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             email: this.signupEmail,
             code: this.enteredCode
@@ -142,10 +137,8 @@ export default {
 
     async createAccount() {
       try {
-        const response = await fetch('/auth/signup', {
+        const response = await fetchWithCsrf('/auth/signup', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             firstName: this.signupFirstName,
             lastName: this.signupLastName,

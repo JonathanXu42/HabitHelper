@@ -101,6 +101,8 @@
 </template>
 
 <script>
+import { fetchWithCsrf } from '../stores/csrfStore';
+
 export default {
   name: 'HabitModal',
   data() {
@@ -236,10 +238,8 @@ export default {
 
         const method = this.editMode ? 'PATCH' : 'POST';
 
-        const response = await fetch(url, {
+        const response = await fetchWithCsrf(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify(payload)
         });
 
@@ -262,7 +262,7 @@ export default {
         return;
 
       try {
-        const response = await fetch(`/api/habits/${this.habitData.id}`, {
+        const response = await fetchWithCsrf(`/api/habits/${this.habitData.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });

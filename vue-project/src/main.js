@@ -6,16 +6,21 @@ import { createPinia } from 'pinia'
 import piniaPersistedState from 'pinia-plugin-persistedstate'
 import router from './router'
 import { useUserStore } from './stores/userStore';
+import { useCsrfStore } from './stores/csrfStore';
 
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPersistedState)
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 
 // Call fetchUser once globally before app mounts
 const userStore = useUserStore();
-userStore.fetchUser().finally(() => {
-  app.mount('#app');
+const csrfStore = useCsrfStore();
+
+userStore.fetchUser().catch(console.error).finally(() => {
+  csrfStore.fetchCsrfToken().catch(console.error).finally(() => {
+    app.mount('#app');
+  });
 });

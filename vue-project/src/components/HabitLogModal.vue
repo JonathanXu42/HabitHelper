@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { fetchWithCsrf } from '../stores/csrfStore';
+
 export default {
   name: 'HabitLogModal',
   props: {
@@ -89,10 +91,8 @@ export default {
 
       const method = this.isEditMode ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await fetchWithCsrf(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(this.form)
       });
 

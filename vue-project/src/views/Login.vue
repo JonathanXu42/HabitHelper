@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import { fetchWithCsrf } from '../stores/csrfStore';
+
 export default {
   name: 'Login',
   components: {
@@ -44,12 +46,8 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await fetch('/auth/login', {
+        const response = await fetchWithCsrf('/auth/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
           body: JSON.stringify({ email: this.email, password: this.password })
         });
 

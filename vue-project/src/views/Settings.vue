@@ -56,6 +56,7 @@ import Header from '../components/Header.vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useUserStore } from '../stores/userStore';
+import { fetchWithCsrf } from '../stores/csrfStore';
 import { useTimezoneStore } from '../stores/timezoneStore';
 
 export default {
@@ -100,10 +101,8 @@ export default {
     async changeUserSettings() {
       if (this.email !== this.originalEmail && !this.newEmailCodeVerified) {
         try {
-          const res = await fetch('/api/send-verification-code', {
+          const res = await fetchWithCsrf('/api/send-verification-code', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ email: this.email })
           });
 
@@ -123,10 +122,8 @@ export default {
 
       // Continue with actual update
       try {
-        const response = await fetch('/user-settings', {
+        const response = await fetchWithCsrf('/user-settings', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             firstName: this.firstName,
             lastName: this.lastName,
@@ -156,10 +153,8 @@ export default {
     },
     async verifyNewEmailCode() {
       try {
-        const res = await fetch('/api/verify-code', {
+        const res = await fetchWithCsrf('/api/verify-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             code: this.newEmailVerificationCode,
             email: this.email
@@ -185,10 +180,8 @@ export default {
       if (!this.deleteCodeVerified) {
         // Step 1: send verification code
         try {
-          const res = await fetch('/api/send-verification-code', {
+          const res = await fetchWithCsrf('/api/send-verification-code', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ email: this.originalEmail })
           });
 
@@ -207,10 +200,8 @@ export default {
 
       // Step 2: actually delete account
       try {
-        const response = await fetch('/user-settings/delete-account', {
+        const response = await fetchWithCsrf('/user-settings/delete-account', {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             email: this.originalEmail
           })
@@ -232,10 +223,8 @@ export default {
     },
     async verifyDeleteCode() {
       try {
-        const res = await fetch('/api/verify-code', {
+        const res = await fetchWithCsrf('/api/verify-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             code: this.deleteVerificationCode,
             email: this.originalEmail

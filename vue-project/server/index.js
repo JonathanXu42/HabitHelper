@@ -8,6 +8,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import https from 'https';
 import fs from 'fs';
+import csrf from 'csurf';
+import cookieParser from 'cookie-parser';
 
 import emailRoutes from './routes/email.js';
 import resetPasswordRoutes from './routes/reset-password.js';
@@ -67,11 +69,19 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(cookieParser());
+
 // Sessions and auth
 app.set('trust poxy', 1);
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
+
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 // API Routes
 app.use('/api', emailRoutes);

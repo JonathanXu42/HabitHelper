@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { fetchWithCsrf } from '@/stores/csrfStore';
+
 export default {
   name: 'HabitLogCard',
   props: {
@@ -71,7 +73,7 @@ export default {
     async confirmDelete() {
       if (!confirm('Are you sure you want to delete this habit log?')) return;
       try {
-        const response = await fetch(`/api/habit-logs/${this.log.habitId}/logs/${this.log.id}`, {
+        const response = await fetchWithCsrf(`/api/habit-logs/${this.log.habitId}/logs/${this.log.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });

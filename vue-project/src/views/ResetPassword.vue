@@ -56,6 +56,7 @@
 <script>
 import Header from '../components/Header.vue';
 import { useUserStore } from '../stores/userStore';
+import { fetchWithCsrf } from '../stores/csrfStore';
 
 export default {
   name: 'ResetPassword',
@@ -85,10 +86,8 @@ export default {
       }
 
       try {
-        const response = await fetch('/api/send-verification-code', {
+        const response = await fetchWithCsrf('/api/send-verification-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({ email: this.email })
         });
 
@@ -108,14 +107,12 @@ export default {
 
     async verifyCode() {
         try {
-            const response = await fetch('/api/verify-code', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    email: this.email,
-                    code: this.enteredCode
-                })
+            const response = await fetchWithCsrf('/api/verify-code', {
+              method: 'POST',
+              body: JSON.stringify({
+                  email: this.email,
+                  code: this.enteredCode
+              })
             });
 
             const result = await response.json();
@@ -139,10 +136,8 @@ export default {
       }
 
       try {
-        const response = await fetch('/reset-password', {
+        const response = await fetchWithCsrf('/reset-password', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
           body: JSON.stringify({
             email: this.email,
             newPassword: this.newPassword
