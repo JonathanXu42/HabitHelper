@@ -101,12 +101,18 @@ export default {
     async changeUserSettings() {
       if (this.email !== this.originalEmail && !this.newEmailCodeVerified) {
         try {
-          const res = await fetchWithCsrf('/api/send-verification-code', {
+          const response = await fetchWithCsrf('/api/send-verification-code', {
             method: 'POST',
             body: JSON.stringify({ email: this.email })
           });
 
-          const result = await res.json();
+          const result = await response.json();
+
+          if (response.status === 429) {
+            alert(result.message); // "Too many attempts. Please wait a minute and try again."
+            return;
+          }
+
           if (!result.success) throw new Error(result.message);
 
           this.awaitingNewEmailVerification = true;
@@ -153,7 +159,7 @@ export default {
     },
     async verifyNewEmailCode() {
       try {
-        const res = await fetchWithCsrf('/api/verify-code', {
+        const response = await fetchWithCsrf('/api/verify-code', {
           method: 'POST',
           body: JSON.stringify({
             code: this.newEmailVerificationCode,
@@ -161,7 +167,13 @@ export default {
           })
         });
 
-        const result = await res.json();
+        const result = await response.json();
+
+        if (response.status === 429) {
+          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          return;
+        }
+
         if (!result.success) throw new Error(result.message);
 
         this.newEmailCodeVerified = true;
@@ -180,12 +192,18 @@ export default {
       if (!this.deleteCodeVerified) {
         // Step 1: send verification code
         try {
-          const res = await fetchWithCsrf('/api/send-verification-code', {
+          const response = await fetchWithCsrf('/api/send-verification-code', {
             method: 'POST',
             body: JSON.stringify({ email: this.originalEmail })
           });
 
-          const result = await res.json();
+          const result = await response.json();
+
+          if (response.status === 429) {
+            alert(result.message); // "Too many attempts. Please wait a minute and try again."
+            return;
+          }
+
           if (!result.success) throw new Error(result.message);
 
           this.awaitingDeleteVerification = true;
@@ -223,7 +241,7 @@ export default {
     },
     async verifyDeleteCode() {
       try {
-        const res = await fetchWithCsrf('/api/verify-code', {
+        const response = await fetchWithCsrf('/api/verify-code', {
           method: 'POST',
           body: JSON.stringify({
             code: this.deleteVerificationCode,
@@ -231,7 +249,13 @@ export default {
           })
         });
 
-        const result = await res.json();
+        const result = await response.json();
+
+        if (response.status === 429) {
+          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          return;
+        }
+
         if (!result.success) throw new Error(result.message);
 
         this.deleteCodeVerified = true;

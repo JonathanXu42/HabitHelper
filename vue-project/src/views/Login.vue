@@ -51,12 +51,17 @@ export default {
           body: JSON.stringify({ email: this.email, password: this.password })
         });
 
-        if (!response.ok) {
-          const error = await response.json();
-          return alert(error.message || 'Login failed');
+        const result = await response.json();
+
+        if (response.status === 429) {
+          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          return;
         }
 
-        const user = await response.json();
+        if (!response.ok) {
+          return alert(result.message || 'Login failed');
+        }
+
         this.$router.push('/landing');
       } catch (err) {
         alert('Login request failed');

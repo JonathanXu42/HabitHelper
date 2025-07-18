@@ -122,6 +122,11 @@ export default {
 
         const result = await response.json();
 
+        if (response.status === 429) {
+          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          return;
+        }
+
         if (result.success) {
           alert('Verification successful!');
           this.codeVerified = true;

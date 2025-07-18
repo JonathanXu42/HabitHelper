@@ -294,6 +294,20 @@
       no matter what page they were on, whereas using native inputs offers me more customizability and specificity. The TextInput.vue file
       didn't contain any reusable logic, and it was causing more hassle than it was saving.
     </ProgressLogEntry>
+
+    <ProgressLogEntry date="July 17th, 2025">
+      Big day with a lot of changes today! I've started preparing my website for cloud deployment. My MongoDB database is already in the cloud,
+      so that part's easy. I focused a lot on upgrading my website's security. 
+      
+      Here's a quick list of some of the changes I made:
+      - installed Node.js's helmet package to set HTTPS headers to protect against cross-site scripting and other vulnerabilities
+      - installed Node.js's compression package to minify and obfuscate frontend source files
+      - implemented secure session cookies and HTTPS instead of HTTP
+      - set up HSTS header to prevent protocol downgrade attacks
+      - installed Node.js's csurf package and added CSRF middleware
+      - implemented rate limiting on backend routes involving logins and verification codes using Node.js's express-rate-limit package. Users
+      are allowed 5 backend requests a minute
+    </ProgressLogEntry>
   </div>
 </template>
 

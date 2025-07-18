@@ -10,6 +10,7 @@ import https from 'https';
 import fs from 'fs';
 import csrf from 'csurf';
 import cookieParser from 'cookie-parser';
+import authLimiter from './middleware/rateLimiter.js';
 
 import emailRoutes from './routes/email.js';
 import resetPasswordRoutes from './routes/reset-password.js';
@@ -50,6 +51,13 @@ app.use(helmet({
     }
   }
 }));
+
+app.use(helmet.hsts({
+  maxAge: 31536000,  // 1 year in seconds
+  includeSubDomains: true,
+  preload: true
+}))
+
 app.use(compression());
 app.use(express.json());
 
@@ -72,8 +80,8 @@ app.use(cors({
 app.use(cookieParser());
 
 // Sessions and auth
-app.set('trust poxy', 1);
-app.use(sessionMiddleware);
+// app.set('trust proxy', 1);     //Setting this in development breaks Google sign ins because there's no proxy
+app.use(sessionMiddleware);       //being used. Only enable this in production
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -82,6 +90,10 @@ app.use(csrfProtection);
 app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
+
+app.use('/auth/login', authLimiter);
+app.use('/api/send-verification-code', authLimiter);
+app.use('/api/verify-code', authLimiter);
 
 // API Routes
 app.use('/api', emailRoutes);
@@ -115,6 +127,7 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
   https.createServer(httpsOptions, app).listen(NODE_PORT, () => {
+    console.log("hi")
     console.log(`🚀 Dev server running at https://localhost:${NODE_PORT}`);
   });
 } else {
