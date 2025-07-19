@@ -57,6 +57,7 @@
 import Header from '../components/Header.vue';
 import { useUserStore } from '../stores/userStore';
 import { fetchWithCsrf } from '../stores/csrfStore';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'ResetPassword',
@@ -69,7 +70,8 @@ export default {
       codeSent: false,
       enteredCode: '',
       codeVerified: false,
-      userStore: null
+      userStore: null,
+      toast: null
     };
   },
   created() {
@@ -77,11 +79,13 @@ export default {
     if (this.userStore.user) {
       this.email = this.userStore.user.email;
     }
+
+    this.toast = useToast();
   },
   methods: {
     async emailVerificationCode() {
       if (!this.email.includes('@')) {
-        alert('Please enter a valid email address.');
+        this.toast.warning('Please enter a valid email address.');
         return;
       }
 
@@ -94,20 +98,20 @@ export default {
         const result = await response.json();
 
         if (response.status === 429) {
-          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
           return;
         }
 
         if (result.success) {
           this.verificationCode = result.code.toString();
           this.codeSent = true;
-          alert(`Verification code sent to ${this.email}`);
+          this.toast.success(`Verification code sent to ${this.email}`);
         } else {
           throw new Error(result.message);
         }
       } catch (error) {
         console.error('Error sending verification code:', error);
-        alert('There was a problem sending the verification code.');
+        this.toast.error('There was a problem sending the verification code.');
       }
     },
 
@@ -124,25 +128,25 @@ export default {
             const result = await response.json();
 
             if (response.status === 429) {
-              alert(result.message); // "Too many attempts. Please wait a minute and try again."
+              this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
               return;
             }
 
             if (result.success) {
-                alert('Verification successful!');
+                this.toast.success('Verification successful!');
                 this.codeVerified = true;
             } else {
-                alert(result.message || 'Verification failed');
+                this.toast.error(result.message || 'Verification failed');
             }
         } catch (error) {
             console.error('Verification failed:', error);
-            alert('Verification failed');
+            this.toast.error('Verification failed');
         }
     },
 
     async submitNewPassword() {
       if (this.newPassword !== this.confirmPassword) {
-        alert('Passwords do not match.');
+        this.toast.warning('Passwords do not match.');
         return;
       }
 
@@ -157,14 +161,14 @@ export default {
 
         const result = await response.json();
         if (result.success) {
-          alert('Password updated successfully!');
+          this.toast.success('Password updated successfully!');
           this.$router.push('/landing');
         } else {
           throw new Error(result.message);
         }
       } catch (error) {
         console.error('Password reset error:', error);
-        alert('Failed to reset password.');
+        this.toast.error('Failed to reset password.');
       }
     }
   }

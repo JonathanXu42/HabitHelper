@@ -40,6 +40,7 @@ import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useTimezoneStore } from '../stores/timezoneStore';
 import { fetchWithCsrf } from '../stores/csrfStore';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'Create-Account',
@@ -58,7 +59,8 @@ export default {
       timezones: [],
       codeSent: false,
       enteredCode: '',
-      codeVerified: false
+      codeVerified: false,
+      toast: null
     };
   },
   created() {
@@ -66,15 +68,20 @@ export default {
     this.timezoneStore.initTimezones();
     this.timezones = this.timezoneStore.timezones;
     this.signupTimezone = this.timezoneStore.guessDefault();
+
+    this.toast = useToast();
   },
   methods: {
     async handleInitialSubmit() {
-      if (this.signupPassword !== this.signupConfirm) {
-        return alert('Passwords do not match');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.signupEmail)) {
+        this.toast.warning('Please enter a valid email address');
+        return;
       }
 
-      if (!this.signupEmail.includes('@')) {
-        return alert('Please enter a valid email address.');
+      if (this.signupPassword !== this.signupConfirm) {
+        this.toast.warning('Passwords do not match');
+        return;
       }
 
       try {
@@ -85,11 +92,13 @@ export default {
 
         const checkResult = await checkRes.json();
         if (!checkResult.success) {
-          return alert(checkResult.message || 'Email is already registered');
+          this.toast.warning(checkResult.message);
+          return;
         }
       } catch (err) {
         console.error('Error checking email:', err);
-        return alert('Failed to check email availability');
+        this.toast.error('Failed to check email availability');
+        return;
       }
 
       try {
@@ -106,7 +115,7 @@ export default {
         }
       } catch (error) {
         console.error('Error sending verification code:', error);
-        alert('There was a problem sending the verification code.');
+        this.toast.error('There was a problem sending the verification code');
       }
     },
 
@@ -123,20 +132,20 @@ export default {
         const result = await response.json();
 
         if (response.status === 429) {
-          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
           return;
         }
 
         if (result.success) {
-          alert('Verification successful!');
+          this.toast.success('Verification successful!');
           this.codeVerified = true;
           this.createAccount();
         } else {
-          alert(result.message || 'Verification failed');
+          this.toast.error(result.message || 'Verification failed');
         }
       } catch (error) {
         console.error('Verification failed:', error);
-        alert('Verification failed');
+        this.toast.error('Verification failed');
       }
     },
 
@@ -155,14 +164,15 @@ export default {
 
         if (!response.ok) {
           const error = await response.json();
-          return alert(error.error || 'Signup failed');
+          this.toast.error(error.error || 'Signup failed');
+          return;
         }
 
         const user = await response.json();
         this.$router.push('/landing');
       } catch (err) {
         console.error('Signup request failed:', err);
-        alert('Signup request failed');
+        this.toast.error('Signup request failed');
       }
     }
   }

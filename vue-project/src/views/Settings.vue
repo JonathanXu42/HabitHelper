@@ -58,6 +58,7 @@ import 'vue-multiselect/dist/vue-multiselect.min.css';
 import { useUserStore } from '../stores/userStore';
 import { fetchWithCsrf } from '../stores/csrfStore';
 import { useTimezoneStore } from '../stores/timezoneStore';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'Settings',
@@ -79,7 +80,8 @@ export default {
       awaitingDeleteVerification: false,
       deleteCodeVerified: false,
       deleteVerificationCode: '',
-      userStore: null
+      userStore: null,
+      toast: null
     };
   },
   created() {
@@ -95,7 +97,9 @@ export default {
       this.email = this.userStore.user.email;
       this.originalEmail = this.userStore.user.email;
       this.timezone = this.timezones.find(tz => tz.name === this.userStore.user.timezone);
-    }    
+    }
+    
+    this.toast = useToast();
   },
   methods: {
     async changeUserSettings() {
@@ -109,18 +113,18 @@ export default {
           const result = await response.json();
 
           if (response.status === 429) {
-            alert(result.message); // "Too many attempts. Please wait a minute and try again."
+            this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
             return;
           }
 
           if (!result.success) throw new Error(result.message);
 
           this.awaitingNewEmailVerification = true;
-          alert('A verification code has been sent to your new email. Please enter it below.');
+          this.toast.success('A verification code has been sent to your new email. Please enter it below.');
         
         } catch (err) {
             console.error(err);
-            alert('Failed to send verification code: ' + err.message);
+            this.toast.error('Failed to send verification code: ' + err.message);
         }
 
         return; //Stop submission for now
@@ -144,7 +148,7 @@ export default {
         }
 
         const result = await response.json();
-        alert('Settings updated successfully');
+        this.toast.success('Settings updated successfully');
 
         this.userStore.user = result.user;
         this.originalEmail = this.email;
@@ -154,7 +158,7 @@ export default {
 
       } catch (error) {
         console.error(error);
-        alert("Couldn't update user settings");
+        this.toast.error("Couldn't update user settings");
       }
     },
     async verifyNewEmailCode() {
@@ -170,7 +174,7 @@ export default {
         const result = await response.json();
 
         if (response.status === 429) {
-          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
           return;
         }
 
@@ -178,11 +182,11 @@ export default {
 
         this.newEmailCodeVerified = true;
         this.awaitingNewEmailVerification = false;
-        alert('Email verified! You can now resubmit your settings.');
+        this.toast.success('Email verified! You can now resubmit your settings.');
 
       } catch (err) {
         console.error(err);
-        alert('Verification failed: ' + err.message);
+        this.toast.error('Verification failed: ' + err.message);
       }
     },
     goBack() {
@@ -200,17 +204,17 @@ export default {
           const result = await response.json();
 
           if (response.status === 429) {
-            alert(result.message); // "Too many attempts. Please wait a minute and try again."
+            this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
             return;
           }
 
           if (!result.success) throw new Error(result.message);
 
           this.awaitingDeleteVerification = true;
-          alert('A verification code has been sent to your email. Enter it below to confirm deletion.');
+          this.toast.success('A verification code has been sent to your email. Enter it below to confirm deletion.');
         } catch (error) {
           console.error(error);
-          alert("Failed to send verification code: " + error.message);
+          this.toast.error("Failed to send verification code: " + error.message);
         }
 
         return; // Stop until verified
@@ -230,13 +234,13 @@ export default {
           throw new Error(errorData.message || 'Failed to delete account');
         }
 
-        alert('Account deleted successfully');
+        this.toast.success('Account deleted successfully');
         this.userStore.logout();
         this.$router.push('/');
 
       } catch (error) {
         console.error(error);
-        alert("Couldn't delete account: " + error.message);
+        this.toast.error("Couldn't delete account: " + error.message);
       }
     },
     async verifyDeleteCode() {
@@ -252,7 +256,7 @@ export default {
         const result = await response.json();
 
         if (response.status === 429) {
-          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
           return;
         }
 
@@ -260,10 +264,10 @@ export default {
 
         this.deleteCodeVerified = true;
         this.awaitingDeleteVerification = false;
-        alert('Verification successful. You may now press "Delete Account" again to complete account deletion.');
+        this.toast.success('Verification successful. You may now press "Delete Account" again to complete account deletion.');
       } catch (err) {
         console.error(err);
-        alert('Verification failed: ' + err.message);
+        this.toast.error('Verification failed: ' + err.message);
       }
     }    
   }    

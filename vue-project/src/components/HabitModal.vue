@@ -1,4 +1,5 @@
 <template>
+  <ConfirmDialog ref="confirmDialog" />
   <div class="modal-overlay">
     <div class="modal">
       <div class="modal-content">
@@ -102,9 +103,12 @@
 
 <script>
 import { fetchWithCsrf } from '../stores/csrfStore';
+import { useToast } from 'vue-toastification';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'HabitModal',
+  components: { ConfirmDialog },
   data() {
     return {
       form: {
@@ -114,7 +118,8 @@ export default {
         emailReminderEnabled: false,
         reminderTimesByDay: {}
       },
-      days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      toast: null
     };
   },
   props: {
@@ -131,6 +136,8 @@ export default {
     if (!this.editMode) {
       this.resetForm();
     }
+
+    this.toast = useToast();
   },
   watch: {
     habitData: {
@@ -197,7 +204,7 @@ export default {
         this.form.reminderTimesByDay[day].push(newTime);
         this.sortTimesForDay(day);
       } else {
-        alert(`Time ${newFormatted} already exists for ${this.days[day]}`);
+        this.toast.warning(`Time ${newFormatted} already exists for ${this.days[day]}`);
       }
     },
     sortTimesForDay(day) {
@@ -254,12 +261,14 @@ export default {
         this.$emit('created');
         this.$emit('close');
       } catch (err) {
-        alert(err.message);
+        this.toast.error(err.message);
       }
     },
     async confirmDelete() {
-      if (!confirm('Are you sure you want to delete this habit? This cannot be undone.'))
-        return;
+      const confirmed = await this.$refs.confirmDialog.show(
+        'Are you sure you want to delete this habit? This cannot be undone.'
+      );
+      if (!confirmed) return;
 
       try {
         const response = await fetchWithCsrf(`/api/habits/${this.habitData.id}`, {
@@ -272,7 +281,7 @@ export default {
         this.$emit('deleted');
         this.$emit('close');
       } catch (err) {
-        alert(err.message);
+        this.toast.error(err.message);
       }
     },
     resetForm() {

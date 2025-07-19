@@ -308,6 +308,12 @@
       - implemented rate limiting on backend routes involving logins and verification codes using Node.js's express-rate-limit package. Users
       are allowed 5 backend requests a minute
     </ProgressLogEntry>
+
+    <ProgressLogEntry date="July 19th, 2025">
+      I finally replaced Javascript's native alert and confirm popups with some nicer looking custom notifications/popups. I used the Toast
+      package for Vue to replace the alerts with notifications that pop up in the top right corner of the screen and have a green and grey
+      color scheme going on. I replaced the confirmation popups with a ConfirmDialog component stored in ConfirmDialog.vue.
+    </ProgressLogEntry>
   </div>
 </template>
 

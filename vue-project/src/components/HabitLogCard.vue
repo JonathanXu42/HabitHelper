@@ -1,4 +1,5 @@
 <template>
+  <ConfirmDialog ref="confirmDialog" />
   <div class="habit-log-card" @click="toggleExpanded">
     <div class="header-row">
       <h3 class="date-time">
@@ -39,9 +40,12 @@
 
 <script>
 import { fetchWithCsrf } from '@/stores/csrfStore';
+import { useToast } from 'vue-toastification';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'HabitLogCard',
+  components: { ConfirmDialog },
   props: {
     log: {
       type: Object,
@@ -50,8 +54,12 @@ export default {
   },
   data() {
     return {
-      expanded: true
+      expanded: true,
+      toast: null
     };
+  },
+  created() {
+    this.toast = useToast();
   },
   methods: {
     toggleExpanded() {
@@ -71,7 +79,12 @@ export default {
       });
     },
     async confirmDelete() {
-      if (!confirm('Are you sure you want to delete this habit log?')) return;
+      const confirmed = await this.$refs.confirmDialog.show(
+        'Are you sure you want to delete this habit log?'
+      );
+
+      if (!confirmed) return;
+
       try {
         const response = await fetchWithCsrf(`/api/habit-logs/${this.log.habitId}/logs/${this.log.id}`, {
           method: 'DELETE',
@@ -80,7 +93,7 @@ export default {
         if (!response.ok) throw new Error('Failed to delete habit log');
         this.$emit('deleted', this.log.id);
       } catch (err) {
-        alert(err.message);
+        this.toast.error(err.message);
       }
     },
     beforeEnter(el) {

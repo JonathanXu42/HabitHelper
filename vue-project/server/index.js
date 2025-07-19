@@ -127,7 +127,6 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
   https.createServer(httpsOptions, app).listen(NODE_PORT, () => {
-    console.log("hi")
     console.log(`🚀 Dev server running at https://localhost:${NODE_PORT}`);
   });
 } else {

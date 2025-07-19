@@ -32,6 +32,7 @@
 
 <script>
 import { fetchWithCsrf } from '../stores/csrfStore';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'Login',
@@ -40,9 +41,13 @@ export default {
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      toast: null
     };
   },
+  created() {
+    this.toast = useToast();
+  }, 
   methods: {
     async login() {
       try {
@@ -54,17 +59,17 @@ export default {
         const result = await response.json();
 
         if (response.status === 429) {
-          alert(result.message); // "Too many attempts. Please wait a minute and try again."
+          this.toast.warning(result.message); // "Too many attempts. Please wait a minute and try again."
           return;
         }
 
         if (!response.ok) {
-          return alert(result.message || 'Login failed');
+          return this.toast.error(result.message || 'Login failed');
         }
 
         this.$router.push('/landing');
       } catch (err) {
-        alert('Login request failed');
+        this.toast.error('Login request failed');
       }
     },
     signInWithGoogle() {
