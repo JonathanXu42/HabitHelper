@@ -73,7 +73,10 @@ export default {
       }
     },
     signInWithGoogle() {
-      window.location.href = '/auth/google';
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      sessionStorage.setItem('timezone', timezone);
+
+      window.location.href = `/auth/google?tz=${encodeURIComponent(timezone)}`;
     }
   }
 };

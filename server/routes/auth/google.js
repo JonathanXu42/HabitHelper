@@ -3,7 +3,12 @@ import passport from 'passport';
 
 const router = express.Router();
 
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', (req, res, next) => {
+  if (req.query.tz) {
+    req.session.timezone = req.query.tz;
+  }
+  next();
+}, passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),

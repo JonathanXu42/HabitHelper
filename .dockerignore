@@ -1,0 +1,22 @@
+# Ignore node modules from local machine
+node_modules
+
+# Ignore sensitive developer secrets
+.env
+*.pem
+ssl/
+get_refresh_token.js
+
+# Ignore source files that aren't needed in production
+src/
+vite.config.js
+jsconfig.json
+index.html
+public/
+
+# Ignore Git + Docker metadata
+.git
+.gitignore
+.gitattributes
+Dockerfile
+README.md

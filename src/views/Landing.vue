@@ -54,6 +54,8 @@ export default {
   async created() {
     this.userStore = useUserStore();
     await this.fetchHabits();
+
+    sessionStorage.removeItem('timezone');
   },
   methods: {
     async fetchHabits() {
