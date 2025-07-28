@@ -3,29 +3,37 @@ import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import './configureDotenv.js';
 
-const oauth2Client = new google.auth.OAuth2(
-    process.env.VITE_GOOGLE_CLIENT_ID,
-    process.env.CLIENT_SECRET,
-    "https://developers.google.com/oauthplayground"
-)
+let transporter = null;
 
-oauth2Client.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-});
+export async function getTransporter() {
+    if (transporter) return transporter;
 
-const { token: accessToken } = await oauth2Client.getAccessToken();
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.VITE_GOOGLE_CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        "https://developers.google.com/oauthplayground"
+    );
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        type: 'OAuth2',
-        user: process.env.GMAIL_ADDRESS,
-        clientId: process.env.VITE_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN,
-        accessToken: accessToken
-    }
-});
+    oauth2Client.setCredentials({
+        refresh_token: process.env.REFRESH_TOKEN
+    });
+
+    const { token: accessToken } = await oauth2Client.getAccessToken();
+
+    transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            type: 'OAuth2',
+            user: process.env.GMAIL_ADDRESS,
+            clientId: process.env.VITE_GOOGLE_CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+            refreshToken: process.env.REFRESH_TOKEN,
+            accessToken: accessToken
+        }
+    });
+
+    return transporter;
+}
 
 export async function emailVerificationCode(recipientEmail) {
     const code = Math.floor(100000 + Math.random() * 900000);

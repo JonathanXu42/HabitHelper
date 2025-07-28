@@ -34,7 +34,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-const NODE_PORT = process.env.NODE_PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(helmet({
@@ -80,7 +80,7 @@ app.use(cors({
 app.use(cookieParser());
 
 // Sessions and auth
-// app.set('trust proxy', 1);     //Setting this in development breaks Google sign ins because there's no proxy
+app.set('trust proxy', 1);     //Setting this in development breaks Google sign ins because there's no proxy
 app.use(sessionMiddleware);       //being used. Only enable this in production
 app.use(passport.initialize());
 app.use(passport.session());
@@ -126,11 +126,11 @@ if (process.env.NODE_ENV !== 'production') {
     cert: fs.readFileSync('./localhost.pem'),
   };
 
-  https.createServer(httpsOptions, app).listen(NODE_PORT, () => {
-    console.log(`🚀 Dev server running at https://localhost:${NODE_PORT}`);
+  https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`🚀 Dev server running at https://localhost:${PORT}`);
   });
 } else {
-  app.listen(NODE_PORT, () => {
-    console.log(`🚀 Prod server running at https://localhost:${NODE_PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Prod server running at https://localhost:${PORT}`);
   });
 }

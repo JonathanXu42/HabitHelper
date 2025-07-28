@@ -314,6 +314,82 @@
       package for Vue to replace the alerts with notifications that pop up in the top right corner of the screen and have a green and grey
       color scheme going on. I replaced the confirmation popups with a ConfirmDialog component stored in ConfirmDialog.vue.
     </ProgressLogEntry>
+
+    <ProgressLogEntry date="July 28th, 2025">
+      It took a while, but I was finally able to deploy my project to the cloud – specifically Google Cloud Run. The first thing I had to do
+      before actually deploying it to Google Cloud was to first containerize my project using Docker and ensure that my Docker container
+      would be able to run on my local machine first.
+
+      My first dilemma was picking a base image of Node.js that didn't have any security vulnerabilities. VSCode checks Docker base image 
+      layers for known CVEs, and the Alpine, Debian, and slim versions of Node version.js 22.13.1, which my project was using, all had known
+      vulnerabilities. Since Alpine has the fewest of them and is the smallest, I decided to go with Alpine.
+
+      During local testing, my project was essentially split up into three parts: I had my frontend and backend in a Docker container, my
+      MongoDB database which was already running in the cloud via MongoDB Atlas, and my .env file on my local machine that was providing
+      environment variables needed for my project to connect to the MongoDB database and access Gmail APIs. Prisma had some trouble initially
+      connecting to the database, which I ended up fixing by running "npx prisma generate" inside the Dockerfile and removing quotation marks
+      from around the DATABASE_URL variable in my .env file.
+
+      I set up my server/index.js file so that it would enforce HTTPS and SSL if the NODE_ENV variable in .env was set to "production," but
+      wouldn't if it was set to "development." In my Dockerfile, I set the NODE_ENV variable as "production", but I had it set to "developemnt"
+      in my .env file, and it turns out that when I ran my Docker container with an --env-file flag, the environment variables in my .env file
+      override the environment variables in my Dockerfile. This meant that I wasn't able to test my project with HTTPS, so I ended up changing
+      NODE_ENV in .env to "production." Really interesting behavior
+
+      One unexpected bug that happened when I was testing my container was with automatically detecting the user's timezone when creating an
+      account. I use the Passport.js library to create new accounts for users who sign up with their gmail account, whereas when users sign up
+      with an email and password combination, I use Node.js's moment library to detect their timezone. Passport.js was giving me a neutral
+      timezone with no UTC offset, while moment was correctly guessing my timezone (America/New_York, UTC-4). It turns out that because moment
+      was running in the browser, it had access to my timezone, but Passport.js was running in the backend and was returning the server's
+      timezone (my container's environment).
+
+      There's no way to accurately detect a user's timezone from the backend, unless I base it off their IP address which would've been clunky
+      or invasive, so instead I had the frontend Login.vue file detect the user's timezone, save it in session storage, and then send it to my
+      backend. Problem solved.
+
+      After getting my Docker container to work locally, it was time to deploy it. I downloaded Google Cloud CLI, added my environment variables
+      to Google Secret Manager, and pushed my Docker image to Google Artifact Registry. From this point on, I had to tweak the Docker image two
+      or three times to squash some bugs, but it was mostly a matter of configuring environment variables and setting up infrastructure
+      like VPCs and NATs in order to get the containers to work.
+
+      One convenient feature about Google Cloud Run is that it handles HTTPS and SSL/TLS for me, so I didn't have to worry about adding .pem files
+      or SSL certs to Google Secret Manager. I ran into a couple of CORS errors because some parts of my project had hardcoded references to
+      localhost port 3000 and my authorized Javascript origins and redirect URIs were localhost addresses, so I had to change those around.
+
+      This was a little trickier than you might imagine. Google Cloud Run is supposed to assign my project a URL after it successfully deploys it,
+      but I couldn't successfully deploy it without being first assigned a URL because my project would fail immediately due to the aforementioned
+      CORS errors! Thankfully, after doing a bit of digging in Google Cloud Console, I found the URL that GCP <i>would have</i> assigned my project
+      if it had succeeded.
+
+      Another error I ran into had to do with the cron job I've got that checks for scheduled email reminders every minute. In order to access my gmail
+      account and send emails from it, my website had to access several environment variables from Google Secret Manager like
+      VITE_GOOGLE_CLIENT_ID, CLIENT_SECRET, and REFRESH_TOKEN, then create an OAuth2 client, then get an access token from the Oauth2 client. I was
+      getting a Gaxios invalid client error when my project started up, so my first thought was that the website wasn't able to read the environment
+      variables from Google Secret Manager, and that's why it failed to create a valid OAuth2 client.
+
+      My first line of thinking was to add some console.log statements to the top of my server/index.js file, to check that the website was able to
+      get the right values for the environment variables. To my surprise, my project kept failing before any of the print statements were triggered, and
+      I couldn't tell what was wrong or if my website had the correct values. After doing some research, I learned that Google Cloud Run only injects
+      environment variables from Google Secret Manager at runtime. My website was failing before the print statements ever got a chance to execute because
+      it was trying to initialize an OAuth2 client at buildtime, when the environment variables are still undefined.
+
+      I had to lazy-load/lazy-initialize the OAuth2 client creation and access token fetching, so that it only runs when my cron job runs. Every minute,
+      my cron job checks if there's a valid OAuth2 client, and if there isn't, it creates one. Obviously, it will only ever create an OAuth2 client one
+      time for every container deployment, but the overhead of checking whether there's a valid OAuth2 client is minimal. Although my cron job runs every
+      minute, this was enough of a delay to allow my environment variables to be injected from Google Secret Manager.
+
+      The last major bug I encountered was trying to grant my website production access to my MongoDB database. I never had an issue with this in
+      development because I enabled all read/write traffic originating from my IP address, but now my website was running from the IP address of a
+      Google-owned server somewhere in the American Midwest.
+
+      I had to set up a serverless VPC connector, reserve a static IP address, configure a NAT gateway, create a subnet, and then whitelist the IP
+      address I reserved, but I kept getting an SSL error that said my project couldn't connect to my database. On a whim, I temporarily whitelisted
+      all IP addresses, and my website was able to connect, which meant that I must've whitelisted the wrong IP address initially. Upon doing some
+      digging in Google Cloud Console, I realized that GCP automatically allocated a cloud NAT IP and was routing traffic through it instead of the
+      static IP I had reserved earlier. Upon updating my NAT gateway to use this static IP, I was able to get my website to connect to the database
+      while removing the ability to connect to the database from all IP addresses (which would have been a huge security concern if I left it that
+      way).
+    </ProgressLogEntry>
   </div>
 </template>
 
